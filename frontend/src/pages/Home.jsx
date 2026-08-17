@@ -34,6 +34,7 @@ export default function Home() {
     });
     return (
         <main
+            id="main-content"
             className="grain relative bg-ink text-white"
             data-testid="home-page"
         >

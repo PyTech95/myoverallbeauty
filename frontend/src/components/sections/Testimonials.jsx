@@ -69,10 +69,14 @@ export default function Testimonials() {
                                 onClick={() => setI(k)}
                                 aria-label={`Testimonial ${k + 1}`}
                                 data-testid={`t-dot-${k}`}
-                                className={`h-px w-8 transition-colors ${
-                                    k === idx ? "bg-gold" : "bg-white/20"
-                                }`}
-                            />
+                                className="grid h-11 w-11 place-items-center"
+                            >
+                                <span
+                                    className={`block h-[2px] w-8 transition-colors ${
+                                        k === idx ? "bg-gold" : "bg-white/40"
+                                    }`}
+                                />
+                            </button>
                         ))}
                     </div>
                     <button

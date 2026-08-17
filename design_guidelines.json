@@ -1,120 +1,142 @@
 {
-  "project_name": "Overall Beauty & Wellness Aesthetics",
-  "theme": "dark",
+  "project_name": "Overall Beauty & Wellness - Editorial Noir Readability & Usability Enhancement",
+  "target_audience": "Clients aged 30-65, non-technical, seeking luxury med-spa treatments in Farmingdale, NY",
+  "brand_identity": "Editorial Noir (Near-black #0A0A0A background, Cream #F9F6F0 text/accents, Gold #D4AF37 accents, Cormorant Garamond display serif italic + Manrope clean sans-serif body)",
+  "core_objective": "Transform readability, legibility, and usability across all screens and user roles without losing the signature luxury Editorial Noir aesthetic.",
+  "contrast_and_opacity_rules": {
+    "anti_pattern_fix": "Eliminate text-white/30, text-white/40, text-white/50, and text-white/60 across all body, paragraph, label, and interactive elements.",
+    "minimum_contrast_standards": {
+      "primary_text": "#F9F6F0 (Cream) or #FFFFFF (Pure White) - 100% opacity for main headings and essential body text",
+      "secondary_text": "text-white/85 or #D4D4D4 - WCAG AA compliant on #0A0A0A dark background",
+      "muted_caption_text": "text-white/75 or #A3A3A3 - minimum allowed opacity for secondary metadata/footnotes",
+      "borders_and_dividers": "rgba(212, 175, 55, 0.35) or rgba(255, 255, 255, 0.20) - clear structural definition without harshness"
+    }
+  },
   "typography": {
-    "fonts": {
-      "heading": "Cormorant Garamond",
-      "body": "Manrope"
+    "font_families": {
+      "display_heading": "Cormorant Garamond, Georgia, serif (italic or regular display)",
+      "body_and_ui": "Manrope, system-ui, sans-serif"
     },
-    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Manrope:wght@300;400;500;600&display=swap",
-    "rules": {
-      "h1": "text-5xl sm:text-6xl lg:text-7xl font-light tracking-tighter leading-none italic",
-      "h2": "text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight",
-      "h3": "text-xl sm:text-2xl font-normal",
-      "body": "text-base tracking-wide font-light leading-relaxed",
-      "labels": "uppercase text-xs tracking-[0.2em] font-medium"
+    "type_scale": {
+      "h1_hero": {
+        "px": "36px - 60px",
+        "rem": "2.25rem - 3.75rem",
+        "tailwind": "text-4xl sm:text-5xl lg:text-6xl",
+        "line_height": "leading-[1.15]",
+        "font_weight": "font-serif font-light tracking-tight",
+        "usage": "Main hero headline and primary section titles"
+      },
+      "h2_section": {
+        "px": "28px - 40px",
+        "rem": "1.75rem - 2.5rem",
+        "tailwind": "text-2xl sm:text-3xl lg:text-4xl",
+        "line_height": "leading-tight",
+        "font_weight": "font-serif font-normal tracking-tight",
+        "usage": "Major page sections, manifesto titles, tab section headers"
+      },
+      "h3_card_heading": {
+        "px": "20px - 24px",
+        "rem": "1.25rem - 1.5rem",
+        "tailwind": "text-xl sm:text-2xl",
+        "line_height": "leading-snug",
+        "font_weight": "font-serif font-medium",
+        "usage": "Service titles, modal titles, account section headers"
+      },
+      "body_primary": {
+        "px": "16px - 18px",
+        "rem": "1rem - 1.125rem",
+        "tailwind": "text-base sm:text-lg",
+        "line_height": "leading-relaxed",
+        "font_weight": "font-sans font-normal text-cream",
+        "usage": "Main copy, treatment descriptions, FAQ answers, legal prose"
+      },
+      "body_secondary": {
+        "px": "14px - 15px",
+        "rem": "0.875rem - 0.9375rem",
+        "tailwind": "text-sm sm:text-base",
+        "line_height": "leading-normal",
+        "font_weight": "font-sans font-normal text-white/85",
+        "usage": "Subtitles, input labels, table secondary values, list metadata"
+      },
+      "eyebrow_label": {
+        "px": "13px - 14px",
+        "rem": "0.8125rem - 0.875rem",
+        "tailwind": "text-xs sm:text-sm uppercase tracking-[0.2em] font-medium text-gold",
+        "line_height": "leading-none",
+        "usage": "Section eyebrows ONLY. Disallowed for buttons, nav links, and body content."
+      }
+    },
+    "measure_and_line_length": {
+      "max_width_rule": "Limit body prose width to max-w-2xl or 65-75 characters per line (max-w-prose) for effortless reading",
+      "text_align_rule": "Left-align all paragraphs, form inputs, service descriptions, and legal content. Avoid full center-alignment for long paragraphs."
     }
   },
-  "colors": {
-    "base": {
-      "ink_black": "#0A0A0A",
-      "charcoal": "#1A1A1A",
-      "champagne_cream": "#F9F6F0"
-    },
-    "accents": {
-      "luminous_gold": "#D4AF37",
-      "soft_gold": "#E8C57A"
-    },
-    "text": {
-      "primary": "#FFFFFF",
-      "muted": "#A3A3A3",
-      "dark_on_light": "#0A0A0A"
-    },
-    "rules": "No full-screen gradients. Deep charcoal/ink black for main backgrounds, warm champagne cream for inner contrasting sections. Luminous gold (#D4AF37) is the ONLY accent color used for delicate hairlines, hovers, and focal elements."
-  },
-  "visual_enhancers": {
-    "surfaces": "Deep, matte backgrounds with very subtle noise/grain texture overlay (opacity 0.03).",
-    "borders": "1px hairline borders in border-white/10 or border-[#D4AF37]/30. Clipped-frame product photography with gold hairline borders.",
-    "effects": "Gold underlines that draw on hover, cursor-follow spotlight in one section. Do NOT use heavy box-shadows; rely on clipping and high contrast."
-  },
-  "layouts": {
-    "banner": "Dismissible top banner (Launch Special). Minimalist, dark gray bg, small uppercase gold text.",
-    "nav": "Glassmorphism nav (backdrop-blur-xl bg-black/60) with subtle 1px border-white/10. Logo left, centered links, gold outlined CTA right.",
-    "hero": "Giant kinetic serif wordmark revealing line-by-line via clip-path masks. Small numbered captions floating like magazine markers. 3D subtle tilt or parallax on a spa-detail shot or abstract gold liquid.",
-    "manifesto": "Numbered chapters ('01 — THE PHILOSOPHY'). Large typography, lots of negative space, staggered fade-ups.",
-    "marquee": "Slow editorial marquee band ('BEAUTY · WELLNESS · CONFIDENCE · RENEWAL'). Serif font, gold or white text on dark background, widely spaced.",
-    "services": "Tabbed editorial layout or strict bento grid categorizing Injectables, Biostimulators, Skin Rejuvenation, IV Hydration. Clear pricing. 1px borders.",
-    "founder_spotlight": "Editorial spotlight on Crystal G. Marrero, FNP-C. Clipped portrait with gold borders, maybe a subtle parallax motion. '02 — THE FOUNDER' label.",
-    "booking_form": "Minimalist inputs, bottom borders only (border-white/20 focus:border-[#D4AF37]). Submit button is a sharp rectangle or subtle pill with gold hover.",
-    "testimonials": "Editorial masonry or elegant fading carousel. Large quote marks in a light serif.",
-    "footer": "Massive typography for 'OVERALL BEAUTY'. Contact details, location, hours on a strict grid."
-  },
-  "components": {
-    "buttons": "Sharp rectangular or pill-shaped buttons. Primary CTA uses gold background with ink black text. Secondary CTA uses transparent bg, 1px gold or white border, hover fills with gold.",
-    "cards": "Cardless or highly restrained 1px bordered containers. No drop shadows. Use padding like p-8 or p-12 to let content breathe.",
-    "inputs": "Floating labels or stark minimalist bottom borders. Background transparent. Focus states must shift border to luminous gold.",
-    "dividers": "1px horizontal rules using border-[#D4AF37]/20 or border-white/10."
-  },
-  "motion": {
-    "libraries_required": [
-      "framer-motion",
-      "lenis",
-      "lucide-react"
-    ],
-    "hero_reveal": "Framer motion: use initial={{ clipPath: 'inset(100% 0 0 0)' }} animate={{ clipPath: 'inset(0% 0 0 0)' }} for line-by-line serif text reveals.",
-    "scroll": "Lenis for smooth momentum scrolling. Setup in an overarching layout component.",
-    "micro_interactions": "Hover states on links trigger a gold 1px underline expanding from center (scaleX). Buttons use slight scale or color fill. Staggered fade-up for manifesto elements.",
-    "parallax": "Use useScroll and useTransform for a slow vertical drift on the founder portrait or hero image."
-  },
-  "images": [
-    {
-      "category": "hero / abstract",
-      "url": "https://images.unsplash.com/photo-1610568129002-c01dc3cdd39c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxnb2xkJTIwbGlxdWlkJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzg0NjM4OTk4fDA&ixlib=rb-4.1.0&q=85",
-      "description": "Gold liquid abstract texture"
-    },
-    {
-      "category": "spa / facial",
-      "url": "https://images.pexels.com/photos/37229304/pexels-photo-37229304.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-      "description": "Calming spa facial treatment"
-    },
-    {
-      "category": "glowing skin",
-      "url": "https://images.unsplash.com/photo-1519668752166-ebdbfe986afd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxnbG93aW5nJTIwc2tpbiUyMHdvbWFuJTIwYmxhY2slMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc4NDYzODk5OHww&ixlib=rb-4.1.0&q=85",
-      "description": "Woman showing glowing skin over black background"
-    },
-    {
-      "category": "founder proxy",
-      "url": "https://images.pexels.com/photos/18788957/pexels-photo-18788957.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-      "description": "Confident female medical professional / FNP-C"
-    },
-    {
-      "category": "iv drip therapy",
-      "url": "https://images.unsplash.com/photo-1585960691786-a593e76d3847?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxpdiUyMGRyaXAlMjB0aGVyYXB5fGVufDB8fHx8MTc4NDYzODk5OXww&ixlib=rb-4.1.0&q=85",
-      "description": "IV drip bag for therapy services"
+  "label_class_refactoring_rules": {
+    "allowed_usage": "Decorative section category eyebrows (e.g., 'CHAPTER 01', 'OUR PHILOSOPHY', 'FARMINGDALE, NY')",
+    "forbidden_usage": "DO NOT use .label on navigation links, action buttons, table data cells, form field inputs, or service prices.",
+    "replacement_classes": {
+      "nav_links": "font-sans text-sm font-medium tracking-wide text-cream/90 hover:text-gold transition-colors duration-200 py-2 px-3 min-h-[44px] flex items-center",
+      "action_buttons": "font-sans text-sm sm:text-base font-semibold tracking-wider text-ink bg-gold hover:bg-gold-soft py-3.5 px-6 rounded transition-all duration-200 shadow-md min-h-[48px]",
+      "table_headers": "font-sans text-xs font-semibold uppercase tracking-wider text-gold/90 border-b border-gold/20 pb-3",
+      "data_values": "font-sans text-sm sm:text-base font-medium text-cream"
     }
-  ],
-  "accessibility": {
-    "contrast": "Text over dark backgrounds must meet WCAG AA contrast. Use #FFFFFF for primary text, #A3A3A3 for secondary. Buttons must have clear focus rings.",
-    "testing": "All interactive and key informational elements MUST include a data-testid attribute (e.g., data-testid='submit-consultation-btn').",
-    "motion": "Respect prefers-reduced-motion for complex Framer Motion animations."
   },
-  "instructions_to_main_agent": {
-    "framework": "React (with .js extensions, not .tsx) + Tailwind CSS. Must install framer-motion, lenis (or @studio-freight/react-lenis), lucide-react, sonner.",
-    "general_ui_ux": [
-      "No generic templates or default component looks. Push the 'Editorial luxury noir' vibe.",
-      "Never use pure transparent backgrounds on sticky headers; use backdrop-blur-xl with a dark tint.",
-      "Avoid universal 'transition: all' which breaks Framer animations.",
-      "Use ample negative space. Awwwards level requires tight precision with typography (tracking, line-height).",
-      "Do not use generic font variants. Stick to Cormorant Garamond for headings and Manrope for body text.",
-      "Include micro-animations for every interaction (hover states, form focus, button click).",
-      "Form integration: use standard React fetch logic assuming a backend route for Resend/Mongo exists, but make the UI stateful (loading, success, error) and notify via Sonner toast."
+  "touch_and_accessibility": {
+    "min_tap_target": "Minimum 44px x 44px on desktop, 48px x 48px on mobile for all buttons, links, calendar dates, and tab triggers",
+    "form_fields": {
+      "min_height": "min-h-[52px]",
+      "padding": "px-4 py-3.5",
+      "font_size": "text-base (prevents iOS auto-zoom on input focus)",
+      "border_style": "border border-white/20 bg-charcoal/60 rounded focus:border-gold focus:ring-1 focus:ring-gold focus:outline-none text-cream placeholder:text-white/50"
+    },
+    "focus_states": "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink rounded-sm",
+    "reduced_motion": "Respect @media (prefers-reduced-motion: reduce) by applying motion-reduce:transform-none motion-reduce:transition-none"
+  },
+  "service_menu_enhancements": {
+    "layout_structure": "Replace cramped single-line text with scannable card rows or spacious 2-column grids",
+    "item_hierarchy": {
+      "title": "font-serif text-xl sm:text-2xl text-cream font-medium",
+      "aka_badge": "inline-block text-xs font-sans text-gold/90 bg-gold/10 px-2.5 py-1 rounded border border-gold/30 ml-2.5",
+      "description": "font-sans text-sm sm:text-base text-white/85 mt-2 leading-relaxed max-w-xl",
+      "price_tag": "font-sans text-lg sm:text-xl font-bold text-gold text-right min-w-[100px]",
+      "note": "font-sans text-xs text-white/75 italic mt-1.5 flex items-center gap-1",
+      "book_button": "mt-3 sm:mt-0 font-sans text-xs uppercase tracking-wider font-semibold text-ink bg-gold hover:bg-gold-soft px-4 py-2.5 rounded transition-all"
+    }
+  },
+  "studio_admin_panel_enhancements": {
+    "table_design": {
+      "header_style": "bg-charcoal/90 text-gold text-xs font-bold uppercase tracking-wider p-4 border-b border-gold/30 text-left",
+      "row_style": "border-b border-white/10 hover:bg-white/[0.03] transition-colors p-4 text-cream text-sm font-sans min-h-[56px]",
+      "status_badges": "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide"
+    },
+    "tab_navigation": "Wrap tabs in scannable, horizontally scrollable tabs container with clear active state underline and gold accent text"
+  },
+  "usability_additions": {
+    "mobile_sticky_action_bar": "Fixed bottom bar on mobile viewports featuring direct 'BOOK CONSULTATION' CTA (min 48px height) and phone/directions quick links",
+    "skip_link": "<a href='#main-content' class='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-gold focus:text-ink focus:font-bold focus:rounded'>Skip to main content</a>",
+    "sticky_navigation": "Header with backdrop-blur-md bg-ink/90 border-b border-gold/20 z-50 transition-all duration-300"
+  },
+  "image_urls": {
+    "hero_and_treatment_images": [
+      {
+        "category": "Med Spa Facial Treatment",
+        "url": "https://images.unsplash.com/photo-1785852790570-0d2858068c70?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Esthetician performing facial on client in luxury treatment room"
+      },
+      {
+        "category": "Aesthetic Injectables / Consultation",
+        "url": "https://images.unsplash.com/photo-1785861137373-d06d18bdf961?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Professional administering precise aesthetic treatment"
+      },
+      {
+        "category": "Luxury Spa Interior",
+        "url": "https://images.pexels.com/photos/11024140/pexels-photo-11024140.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Serene and modern spa treatment room with precision equipment"
+      }
     ]
   },
-  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": {
-    "design_aesthetics": "Create depth through layered design elements and z-index hierarchy. Avoid generic centered layouts and simplistic gradients.",
-    "interaction": "Every interaction needs micro-animations. Use modern pill-shaped or sharp rectangular buttons. NEVER use AI assistant Emojis.",
-    "spacing": "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
-    "components": "Use sonner for toasts. Customize Shadcn elements completely if used, to remove default 'Vercel-look'.",
-    "files": "You have .js files not .tsx file, so write components in JS."
+  "general_ui_ux_testing_guidelines": {
+    "data_testid_rule": "All interactive buttons, inputs, links, tabs, and critical text nodes MUST include explicit data-testid attributes formatted in kebab-case (e.g. data-testid='nav-book-now-button', data-testid='service-item-price').",
+    "testing_stability": "Ensure data-testid attributes remain static across state changes for reliable end-to-end testing."
   }
 }

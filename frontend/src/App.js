@@ -24,6 +24,9 @@ function App() {
             <BrowserRouter>
                 <AuthProvider>
                     <ContentProvider>
+                        <a href="#main-content" className="skip-link">
+                            Skip to main content
+                        </a>
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/book" element={<Book />} />

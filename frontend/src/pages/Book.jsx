@@ -63,6 +63,7 @@ export default function Book() {
 
     return (
         <main
+            id="main-content"
             className="grain relative bg-ink text-white"
             data-testid="book-page"
         >

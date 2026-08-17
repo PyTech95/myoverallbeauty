@@ -1,0 +1,35 @@
+{
+  "summary": "Frontend-only readability/UX pass verification (iteration 8). Verified: base body font-size lifted to 17px; Skip-to-main-content is the first Tab focus and jumps to #main-content on Enter; keyboard focus ring on links, nav, buttons, service tabs, testimonial dots, CTAs is a visible gold 2px outline (rgb(212,175,55)); .field inputs are 55.4px tall (spec >=52px) with subtle bg (rgba(255,255,255,0.04)); testimonial dot tap targets are 46.75x46.75px (>=24px); testimonial prev/dot navigation switches quotes; 'aka' does not appear as a leaked plaintext label in Services (rendered as gold badge markup); FAQ accordion toggles aria-expanded; Home hero/services/testimonials/footer render at 1920 and 1440; /book calendar tappable, slots render on JS click (Playwright dispatch OK), step 2 shows 6 .field inputs with 55.4px heights; /privacy /terms /accessibility /cookies each return 200 with heading; /signin has 2 .field, /signup has 5 .field; staff login (crystal@overallbeauty.com) reaches /studio, all 3 tabs present (studio-tab-bookings/rsvps/editor); mobile 390: promo pop-up close button visible at top-right with 46.75x46.75 tap area, hamburger opens nav with 5 links; sticky bottom bar present without covering popup close. No pageerrors or console errors observed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": ".field (index.css)",
+        "issue": "The review spec says 'All buttons/links/inputs show a visible gold focus ring when tabbed to'. Buttons and links DO get the gold 2px outline via `:where(a,button,input,select,textarea,[tabindex]):focus-visible { outline: 2px solid #d4af37 }` (verified: rgb(212,175,55) 2px on Skip link, nav links, service tabs, CTAs). Inputs with class .field do NOT — because `.field { outline: none; }` (index.css:277) has equal specificity to `:where(...)` (0,1,0) and is defined later, so it wins. Confirmed via keyboard-driven Tab into /signin: `getComputedStyle(activeElement).outlineWidth === '0px'`. There is still a visible focus indicator (border-bottom turns gold and background gets a warm tint via `.field:focus`), but the gold ring promised in the spec is missing on inputs/textareas/selects.",
+        "selector": ".field:focus-visible",
+        "priority": "MEDIUM",
+        "suggested_fix": "Add `.field:focus-visible { outline: 2px solid #d4af37; outline-offset: 3px; border-radius: 2px; }` after the existing `.field:focus` rule in /app/frontend/src/index.css. Do not remove `outline: none` from the base `.field` rule (that's fine because non-keyboard focus should stay clean)."
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Add `.field:focus-visible { outline: 2px solid #d4af37; outline-offset: 3px; }` in /app/frontend/src/index.css so keyboard-focused inputs get the same gold ring as buttons/links (spec compliance for the a11y bullet in the review request)."
+  ],
+  "critical_code_review_comments": [
+    "index.css: `.field { outline: none }` at specificity (0,1,0) overrides the global `:where(...):focus-visible` (specificity 0,1,0, but defined earlier). This defeats the intended keyboard-visible ring on inputs. Add a `.field:focus-visible` rule with the gold outline to close the gap.",
+    "Home page's `#consultation` section is rendered by components/sections/Booking.jsx (not Consultation.jsx). Consultation.jsx exists but is not imported by Home.jsx — it's dead code as far as the home route is concerned. Confirm intent; if unused, remove to reduce confusion (the review request talks about a 'consultation form on the home page' which is actually the booking form, and the .field-styled inputs only appear at step 2 of that flow — this is expected).",
+    "Booking step-1 -> step-2 continue does not advance via Playwright synthetic click on the time slot when performed too soon after date pick; JS `.click()` dispatch works. Not a user-facing bug (real mouse works), but a hint that the slot button's onClick may be racing with the render of the time list. Consider adding `aria-pressed` on selected slot for accessibility (currently only className toggles from `border-white/15` to `border-gold bg-gold text-ink`).",
+    "Selecting a date on /book auto-opens the Eva Voice Assistant modal centered on the viewport, which can intercept subsequent clicks including 'Continue'. This is pre-existing behavior (out of scope for this iter), but worth noting for future testing."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only per request)", "frontend": "~95% — one CSS spec miss on input focus ring; all other readability/regression checks pass"},
+  "test_credentials": "Staff crystal@overallbeauty.com / Overall2025! verified working. No client account created (avoided seeding).",
+  "seed_data_creation": "None. Booking flow was exercised but final Confirm was blocked by the Eva assistant modal opening on date pick; no consultation was persisted (Studio Bookings shows 0). No RSVPs created. No editor overrides made — 'Reset all to defaults' was not needed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration 8 is CSS/readability. Verified regressions are none except one a11y gap: .field inputs miss the gold keyboard focus ring because `.field { outline: none }` in index.css (line 277) overrides the global `:where(...):focus-visible` rule (line 71). Everything else — skip-link, base font-size 17px, .field min-h 52px, testimonial dot tap targets, service 'aka' badge (rendered, not leaked as text), FAQ accordion, legal pages, sign in/up field counts, mobile popup close, hamburger, sticky bar — all confirmed working at 1920/1440/390 widths. Booking flow works with real user input; Playwright needs JS click dispatch for the slot to register (framework quirk, not a bug).",
+  "rca of the issue": "CSS specificity: `.field` (0,1,0) with `outline: none` is authored AFTER the global `:where(a,button,input,...) :focus-visible { outline: 2px solid #d4af37 }` rule. `:where()` contributes 0 specificity, so the pseudo-class-only selector matches at (0,1,0), same as `.field`. Because `.field` is later, it wins on `outline`. Result: keyboard focus on inputs shows no ring. Reproduce: navigate to /signin, press Tab twice (past skip link and back-to-home), inspect the focused email input — outlineWidth is 0px. Fix: append `.field:focus-visible { outline: 2px solid #d4af37; outline-offset: 3px; border-radius: 2px; }` to /app/frontend/src/index.css after line 292."
+}

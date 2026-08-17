@@ -53,6 +53,14 @@ Public marketing site; multi-step booking with live availability; double-booking
 - **Upload from Studio**: `POST /api/uploads/video` (staff-only, mp4/webm/mov, 40 MB cap, 415/413 errors) + `VideoInput` widget with preview/replace/remove for both desktop and mobile videos
 - Verified by testing agent (iteration_7): 23/23 backend cases + all frontend flows pass; fixed a first-load auth race in the RSVP panel afterwards
 
+## Readability & usability pass (2026-06, iteration 6)
+- Followed `/app/design_guidelines.json` (design agent) while preserving the Editorial Noir brand
+- Base type 17px/1.65 at weight 400; faint `text-white/30–/70` and `text-ink/50–/80` lifted to WCAG-AA-friendly alphas via utility overrides; `.label` retuned to 13px / 0.16em / 600
+- Form fields: min 52px height, subtle fill, gold focus border **and** gold `:focus-visible` ring; global visible focus ring on all interactive elements
+- Added skip-to-main-content link (first tab stop, `#main-content` on every page) and a `prefers-reduced-motion` block that disables animations/marquee
+- Service menu: "aka" becomes a gold badge, descriptions 16px at higher contrast; testimonial dots became 44px tap targets; legal/FAQ body copy enlarged with tighter measure
+- Verified by testing agent (iteration_8): no regressions at 1920/1440/390; the one gap found (inputs missing the focus ring) is fixed above
+
 ## Known Gaps
 - **Email/SMS NOT configured** — booking + contact succeed but no confirmation emails are sent (needs Resend/SMTP keys)
 - `GET /api/admin/stats` not implemented (not used by the frontend)

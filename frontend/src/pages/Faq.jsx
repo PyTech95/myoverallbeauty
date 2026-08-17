@@ -77,6 +77,7 @@ export default function Faq() {
 
     return (
         <main
+            id="main-content"
             className="grain relative min-h-screen bg-ink text-white"
             data-testid="faq-page"
         >
@@ -87,7 +88,7 @@ export default function Faq() {
                     <Link
                         to="/"
                         data-testid="faq-back-home"
-                        className="label link-underline inline-flex items-center gap-2 text-white/60 hover:text-gold"
+                        className="link-underline inline-flex min-h-[44px] items-center gap-2 text-base font-medium text-white/85 hover:text-gold"
                     >
                         <ArrowLeft className="h-3.5 w-3.5" /> Back to home
                     </Link>
@@ -165,8 +166,8 @@ export default function Faq() {
                                             transition={{ duration: 0.35 }}
                                             className="overflow-hidden"
                                         >
-                                            <p
-                                                className="mt-4 max-w-3xl text-base leading-relaxed text-white/70"
+                            <p
+                                className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 sm:text-lg"
                                                 data-edit={`faq.items.${i}.a`}
                                                 data-testid={`faq-answer-${i}`}
                                             >

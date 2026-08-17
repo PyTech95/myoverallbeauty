@@ -160,7 +160,7 @@ export default function Services() {
                                             </div>
                                             {it.aka && (
                                                 <div
-                                                    className="mt-1 label text-gold/70"
+                                                    className="mt-2 inline-block border border-gold/30 bg-gold/10 px-2.5 py-1 text-xs font-medium tracking-wide text-gold"
                                                     data-edit={`services.categories.${ci}.items.${i}.aka`}
                                                 >
                                                     {it.aka}
@@ -168,7 +168,7 @@ export default function Services() {
                                             )}
                                             {it.description && (
                                                 <p
-                                                    className="mt-2 max-w-xl text-sm leading-relaxed text-white/60 sm:text-[15px]"
+                                                    className="mt-3 max-w-xl text-base leading-relaxed text-white/85"
                                                     data-edit={`services.categories.${ci}.items.${i}.description`}
                                                 >
                                                     {it.description}
@@ -176,7 +176,7 @@ export default function Services() {
                                             )}
                                             {it.note && (
                                                 <div
-                                                    className="mt-2 label text-white/40"
+                                                    className="mt-2 text-sm italic text-white/75"
                                                     data-edit={`services.categories.${ci}.items.${i}.note`}
                                                 >
                                                     {it.note}

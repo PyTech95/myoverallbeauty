@@ -28,6 +28,7 @@ export default function LegalPage({
     });
     return (
         <main
+            id="main-content"
             className="grain relative min-h-screen bg-ink text-white"
             data-testid="legal-page"
         >
@@ -37,7 +38,7 @@ export default function LegalPage({
                     <Link
                         to="/"
                         data-testid="legal-back-home"
-                        className="label link-underline inline-flex items-center gap-2 text-white/60 hover:text-gold"
+                        className="link-underline inline-flex min-h-[44px] items-center gap-2 text-base font-medium text-white/85 hover:text-gold"
                     >
                         <ArrowLeft className="h-3.5 w-3.5" /> Back to home
                     </Link>
@@ -66,7 +67,7 @@ export default function LegalPage({
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7 }}
                     viewport={{ once: true }}
-                    className="prose-legal space-y-6 text-white/75 leading-relaxed"
+                    className="prose-legal space-y-6 text-base leading-relaxed text-white/85 sm:text-lg"
                 >
                     {children}
                 </motion.div>
