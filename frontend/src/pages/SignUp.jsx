@@ -3,8 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth, formatApiErrorDetail } from "../lib/auth";
 import AuthShell from "../lib/AuthShell";
+import { useSeo } from "../lib/seo";
 
 export default function SignUp() {
+    useSeo({
+        title: "Create an account — Overall Beauty & Wellness",
+        description: "Create your client account.",
+        path: "/signup",
+        noindex: true,
+    });
     const { register } = useAuth();
     const nav = useNavigate();
     const [form, setForm] = useState({

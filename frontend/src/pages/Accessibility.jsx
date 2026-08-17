@@ -9,6 +9,8 @@ export default function Accessibility() {
         <LegalPage
             eyebrow="Accessibility"
             title="Accessibility Statement"
+            seoPath="/accessibility"
+            seoDescription="Our commitment to an accessible website and practice at Overall Beauty & Wellness in Farmingdale, NY."
             updated={content.legal.effective_date}
         >
             <p>

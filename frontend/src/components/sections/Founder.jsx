@@ -59,7 +59,9 @@ export default function Founder() {
                             <span className="absolute bottom-3 left-3 h-3 w-3 border-b border-l border-gold" />
                             <span className="absolute bottom-3 right-3 h-3 w-3 border-b border-r border-gold" />
 
-                            <div className="label text-ink/50">The Founder</div>
+                            <div className="label text-ink/50" data-edit="founder.plaque_label">
+                                {F.plaque_label}
+                            </div>
 
                             {/* Monogram — big serif initials */}
                             <div
@@ -74,7 +76,9 @@ export default function Founder() {
                             {/* Gold hairline */}
                             <div className="my-8 flex items-center gap-4">
                                 <span className="h-px flex-1 bg-gold/50" />
-                                <span className="label text-gold">Est. 2025</span>
+                                <span className="label text-gold" data-edit="founder.est_label">
+                                    {F.est_label}
+                                </span>
                                 <span className="h-px flex-1 bg-gold/50" />
                             </div>
 
@@ -82,20 +86,31 @@ export default function Founder() {
                             <h3
                                 className="font-serif italic text-ink leading-[0.95] tracking-tight text-4xl sm:text-5xl lg:text-6xl"
                                 data-testid="founder-name"
+                                data-edit="founder.name"
                             >
                                 {F.name}
                             </h3>
 
                             {/* Title + subtitle */}
-                            <div className="mt-5 label text-gold">{F.title}</div>
-                            <div className="mt-2 text-sm leading-relaxed text-ink/60 sm:text-base">
+                            <div className="mt-5 label text-gold" data-edit="founder.title">
+                                {F.title}
+                            </div>
+                            <div
+                                className="mt-2 text-sm leading-relaxed text-ink/60 sm:text-base"
+                                data-edit="founder.subtitle"
+                            >
                                 {F.subtitle}
                             </div>
                         </div>
 
                         {/* A short mission caption below the plaque */}
                         <div className="mt-8 border-l-2 border-gold pl-5 font-serif text-lg italic leading-relaxed text-ink/70 sm:text-xl">
-                            “{content.mission || "Personalized care, authored one client at a time."}”
+                            “
+                            <span data-edit="mission">
+                                {content.mission ||
+                                    "Personalized care, authored one client at a time."}
+                            </span>
+                            ”
                         </div>
                     </motion.div>
 
@@ -108,32 +123,41 @@ export default function Founder() {
                     >
                         <div className="label mb-6 flex items-center gap-3 text-gold-dark">
                             <span className="h-px w-10 bg-gold-dark/60" />
-                            02 — The Founder
+                            <span data-edit="founder.eyebrow">{F.eyebrow}</span>
                         </div>
                         <h2 className="font-serif text-3xl leading-[0.98] tracking-tight text-ink sm:text-5xl lg:text-6xl">
-                            {F.heading_line1} <br />
-                            {F.heading_line2}{" "}
-                            <em className="italic text-gold-dark">
+                            <span data-edit="founder.heading_line1">
+                                {F.heading_line1}
+                            </span>{" "}
+                            <br />
+                            <span data-edit="founder.heading_line2">
+                                {F.heading_line2}
+                            </span>{" "}
+                            <em className="italic text-gold-dark" data-edit="founder.heading_italic">
                                 {F.heading_italic}
                             </em>
                         </h2>
                         <div className="mt-10 space-y-5 text-base leading-relaxed text-ink/80 sm:text-lg">
                             {(F.bio || []).map((p, i) => (
-                                <p key={i}>{p}</p>
+                                <p key={i} data-edit={`founder.bio.${i}`}>
+                                    {p}
+                                </p>
                             ))}
                         </div>
 
                         <div className="mt-12 grid grid-cols-2 gap-6 border-y border-ink/10 py-8 sm:grid-cols-3">
-                            {[
-                                { k: "Complimentary", v: "Consultations" },
-                                { k: "Evidence-", v: "informed care" },
-                                { k: "1-on-1", v: "with the founder" },
-                            ].map((s, i) => (
+                            {(F.stats || []).map((s, i) => (
                                 <div key={i}>
-                                    <div className="label text-gold-dark">
+                                    <div
+                                        className="label text-gold-dark"
+                                        data-edit={`founder.stats.${i}.k`}
+                                    >
                                         {s.k}
                                     </div>
-                                    <div className="mt-2 font-serif text-xl italic text-ink sm:text-2xl">
+                                    <div
+                                        className="mt-2 font-serif text-xl italic text-ink sm:text-2xl"
+                                        data-edit={`founder.stats.${i}.v`}
+                                    >
                                         {s.v}
                                     </div>
                                 </div>
@@ -146,11 +170,14 @@ export default function Founder() {
                                 data-testid="founder-cta-book"
                                 className="group relative inline-flex items-center gap-4 border border-ink bg-ink px-6 py-3.5 text-[11px] tracking-[0.24em] uppercase font-medium text-cream transition-transform duration-500 hover:translate-y-[-2px] sm:px-7 sm:py-4 sm:text-[12px]"
                             >
-                                Meet with Crystal
+                                <span data-edit="founder.cta_label">{F.cta_label}</span>
                                 <span className="h-px w-8 bg-gold transition-all duration-500 group-hover:w-12" />
                             </Link>
-                            <div className="font-serif text-xl italic text-ink/70 sm:text-2xl">
-                                — Your journey starts with a conversation.
+                            <div
+                                className="font-serif text-xl italic text-ink/70 sm:text-2xl"
+                                data-edit="founder.cta_note"
+                            >
+                                {F.cta_note}
                             </div>
                         </div>
                     </motion.div>

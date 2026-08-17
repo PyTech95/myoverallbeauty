@@ -10,9 +10,27 @@ import Booking from "../components/sections/Booking";
 import Testimonials from "../components/sections/Testimonials";
 import Footer from "../components/sections/Footer";
 import ScrollProgress from "../components/ScrollProgress";
+import { useContent } from "../lib/contentContext";
+import { useSeo } from "../lib/seo";
 
 export default function Home() {
     useLenis();
+    const { content } = useContent();
+    useSeo({
+        title: "Overall Beauty & Wellness — Aesthetic & Wellness Med Spa in Farmingdale, NY",
+        description:
+            "Boutique med spa in Farmingdale, NY. Botox, Xeomin, lip filler, Sculptra, Radiesse, microneedling with PRP, PDO threads, hydrodermabrasion and IV hydration by Crystal G. Marrero, FNP-C. Book a complimentary consultation.",
+        path: "/",
+        jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: (content.faq?.items || []).slice(0, 4).map((it) => ({
+                "@type": "Question",
+                name: it.q,
+                acceptedAnswer: { "@type": "Answer", text: it.a },
+            })),
+        },
+    });
     return (
         <main
             className="grain relative bg-ink text-white"

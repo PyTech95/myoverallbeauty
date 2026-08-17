@@ -20,16 +20,27 @@ export default function Manifesto() {
                     >
                         <div className="label mb-6 flex items-center gap-3 text-gold">
                             <span className="h-px w-10 bg-gold/60" />
-                            The Manifesto
+                            <span data-edit="manifesto.eyebrow">{M.eyebrow}</span>
                         </div>
                         <h2 className="font-serif text-4xl leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-6xl">
-                            {M.title_line1} <br />
-                            {M.title_line2}{" "}
-                            <em className="italic text-gold-gradient animate-shimmer">
+                            <span data-edit="manifesto.title_line1">
+                                {M.title_line1}
+                            </span>{" "}
+                            <br />
+                            <span data-edit="manifesto.title_line2">
+                                {M.title_line2}
+                            </span>{" "}
+                            <em
+                                className="italic text-gold-gradient animate-shimmer"
+                                data-edit="manifesto.title_italic"
+                            >
                                 {M.title_italic}
                             </em>
                         </h2>
-                        <div className="mt-8 max-w-md text-white/60">
+                        <div
+                            className="mt-8 max-w-md text-white/60"
+                            data-edit="manifesto.subtitle"
+                        >
                             {M.subtitle}
                         </div>
                     </motion.div>
@@ -54,10 +65,16 @@ export default function Manifesto() {
                                 </div>
                                 <div>
                                     <div className="hairline mb-6 -mt-2" />
-                                    <h3 className="font-serif text-2xl italic text-white sm:text-3xl lg:text-4xl">
+                                    <h3
+                                        className="font-serif text-2xl italic text-white sm:text-3xl lg:text-4xl"
+                                        data-edit={`manifesto.chapters.${i}.title`}
+                                    >
                                         {c.title}
                                     </h3>
-                                    <p className="mt-5 max-w-2xl text-base text-white/70 leading-relaxed sm:text-lg">
+                                    <p
+                                        className="mt-5 max-w-2xl text-base text-white/70 leading-relaxed sm:text-lg"
+                                        data-edit={`manifesto.chapters.${i}.body`}
+                                    >
                                         {c.body}
                                     </p>
                                 </div>

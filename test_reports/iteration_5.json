@@ -1,0 +1,47 @@
+{
+  "summary": "Verified FAQ page + SEO iteration. Backend pytest 67/70 passing (same 3 pre-existing SMTP failures — expected, EMERGENT_EMAIL_KEY not configured). PUT /api/content reset-to-defaults bug from iteration_4 is FIXED — verified via curl: PUT {\"data\":{}} now truly clears the overrides doc (only updated_at/updated_by remain). Frontend /faq page renders with 6 default accordion questions, toggle works, no console errors; FAQPage + BreadcrumbList JSON-LD is emitted with valid parseable JSON; each JSON-LD block on the page (MedicalBusiness/LocalBusiness, Person, WebSite, FAQPage, BreadcrumbList) parses cleanly. Live editor on /faq for staff: 'live-edit-start' → 'faq-add' appears, adding a question grows items 6→7 and PERSISTS across a full reload, remove button trashes item and persists 7→6 after publish. Studio → Editor → FAQ tab is fully populated (editor-tab-faq, editor-faq-q-<i>, editor-faq-a-<i>, editor-faq-add, editor-faq-remove-<i>). Footer FAQ links (footer-link-faq + footer-legal-faq) both resolve to /faq. Anonymous visitors do NOT see faq-add or faq-remove-<i>. Static SEO files served at site root: /robots.txt (200), /sitemap.xml (200, application/xml), /llms.txt (200) — all contain the correct AI-bot rules, URL list including /faq, and expected paths. Per-page SEO verified for /, /book, /faq, /privacy, /terms, /accessibility, /cookies (unique title, canonical, robots=index,follow, og:url, twitter:title). /signin and /signup correctly emit robots=noindex,nofollow. /studio also correctly emits noindex,nofollow. Home emits FAQPage schema; /book emits ReserveAction + BreadcrumbList schema. Marquee still contains 'Hydrodermabrasion'. Zero console errors on / and /faq. Left content collection cleared to defaults at the end of testing.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "3 pytest failures (test_iteration8_smtp.py x2 + test_iteration5.py TestConsultationPostRegression)", "issue": "Expected in this preview env — EMERGENT_EMAIL_KEY / SMTP env vars are unset. Same baseline as iteration_4."},
+      {"endpoint": "N/A", "issue": "server.py still uses deprecated @app.on_event startup/shutdown — DeprecationWarnings during pytest. Non-blocking."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Account page SEO", "issue": "GET /account (as a signed-in staff user via hard reload / SPA reload) served meta robots='index, follow' instead of the intended 'noindex, nofollow'. Root cause is that RequireAuth returns a <div data-testid='auth-loading'> during the async token re-hydration on a fresh page load — Account.jsx (which owns the noindex useSeo call) never mounts during that window, so the static index.html meta tags stay in place. Since /account is auth-gated, no external crawler will actually reach it (they'd get redirected to /signin, which correctly emits noindex), so the practical SEO risk is low, but it does violate the spec. Fix suggestion: also add useSeo({noindex:true}) inside RequireAuth's loading branch, or hoist the /account noindex to a route-level meta manager, or put a default 'noindex' robots tag directly in index.html and let public pages override it.", "selector": "meta[name=robots] on /account", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_auth_and_roles.py",
+    "/app/backend/tests/test_iteration3.py",
+    "/app/backend/tests/test_iteration5.py",
+    "/app/backend/tests/test_iteration8_smtp.py",
+    "/app/backend/tests/test_uploads.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Make /account emit noindex,nofollow even while RequireAuth is in its 'auth-loading' state — e.g. add a default <meta name='robots' content='noindex,nofollow'> in public/index.html and let public routes override via useSeo, or move noindex into RequireAuth itself.",
+    "(Optional) Migrate deprecated @app.on_event startup/shutdown to FastAPI lifespan events.",
+    "(Optional) Add a react-router catch-all route or redirect — /studio/editor and other unknown paths currently render a blank page."
+  ],
+  "critical_code_review_comments": [
+    "useSeo() correctly manages canonical/og/twitter/robots and injects/removes JSON-LD blocks — good design, matches spec.",
+    "Faq.jsx computes FAQPage JSON-LD from the live `items` array (via useMemo on items), so Studio-edited questions are reflected in the structured data — content-driven schema is working.",
+    "PUT /api/content now uses replace_one — reset-to-defaults fix from iteration_4 is verified via curl. Consider also validating the payload shape server-side.",
+    "StudioEditor.jsx is 1400+ lines — carried-over recommendation to split into per-tab components for maintainability.",
+    "public/robots.txt disallows /studio /account /signin /signup /api/ and lists AI bots correctly. Sitemap.xml has no '#' fragment URLs and includes lastmod.",
+    "Live editor role-gating (staff only, hidden on /studio) still works correctly per iteration_4 findings — re-verified anonymous state on /faq."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "96% (67/70; 3 expected SMTP failures)", "frontend": "~98% (FAQ CRUD + persistence + SEO all pass; only /account robots edge-case flagged as low-priority)"},
+  "test_credentials": "Staff: crystal@overallbeauty.com / Overall2025! (from /app/memory/test_credentials.md).",
+  "seed_data_creation": "During live-editor testing I added and then removed one FAQ question; final state was cleared to defaults via `curl -X PUT /api/content -d '{\"data\":{}}'`. GET /api/content now returns only updated_at/updated_by — client site is back to defaults.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "iteration_4 reset-bug is fixed and verified. FAQ page (public + live editor + Studio editor tab) and per-route SEO (title, canonical, robots, OG/Twitter, JSON-LD) all work. Static files at site root are served correctly. Only unresolved nit: /account meta robots is 'index,follow' during the RequireAuth loading flash on a hard reload (Account's useSeo never runs because the loading placeholder mounts first). Backend pytest baseline still 67/70 — SMTP env not configured in preview.",
+  "rca_of_the_issue": "For /account noindex regression: On a hard-load of /account, AuthProvider needs a tick to hydrate the JWT from localStorage. During that tick RequireAuth returns a small <div data-testid='auth-loading'> placeholder — Account.jsx (which is where the useSeo({noindex:true}) lives) has not mounted yet, so the static <meta name='robots'> that ships in public/index.html (index,follow) is what's on the page. If Playwright/crawler snapshots that moment, it sees index,follow. Fix: put a global default noindex in index.html and let public pages set index via useSeo, OR add useSeo inside RequireAuth's loading branch."
+}

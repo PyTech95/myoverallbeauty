@@ -614,9 +614,14 @@ async def put_content(payload: ContentIn, user: dict = Depends(require_staff)):
     data = payload.model_dump().get("data") or {}
     if not isinstance(data, dict):
         raise HTTPException(status_code=400, detail="data must be an object")
-    await db.content.update_one(
+    await db.content.replace_one(
         {"id": "main"},
-        {"$set": {**data, "updated_at": now_iso(), "updated_by": user.get("email")}},
+        {
+            "id": "main",
+            **data,
+            "updated_at": now_iso(),
+            "updated_by": user.get("email"),
+        },
         upsert=True,
     )
     doc = await db.content.find_one({"id": "main"}, {"_id": 0, "id": 0})

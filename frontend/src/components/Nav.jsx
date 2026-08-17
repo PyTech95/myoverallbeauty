@@ -3,22 +3,18 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, LogIn, UserPlus } from "lucide-react";
-import { LOGO_URL } from "../lib/content";
+import { useContent } from "../lib/contentContext";
 import { useAuth } from "../lib/auth";
 import { UserMenu } from "../lib/AuthShell";
-
-const links = [
-    { href: "#philosophy", label: "Philosophy" },
-    { href: "#services", label: "Services" },
-    { href: "#founder", label: "Founder" },
-    { href: "#consultation", label: "Consultation" },
-    { href: "#contact", label: "Contact" },
-];
 
 export default function Nav() {
     const [scrolled, setScrolled] = useState(false);
     const [open, setOpen] = useState(false);
     const { user } = useAuth();
+    const { content } = useContent();
+    const brand = content.brand || {};
+    const N = content.nav || {};
+    const links = N.links || [];
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 24);
@@ -42,22 +38,23 @@ export default function Nav() {
                     to="/"
                     className="flex items-center gap-3"
                     data-testid="nav-logo"
-                    aria-label="Overall Beauty & Wellness — home"
+                    aria-label={`${brand.name} — home`}
                 >
                     <img
-                        src={LOGO_URL}
-                        alt="Overall Beauty & Wellness"
+                        src={brand.logo_url}
+                        alt={brand.name}
                         className="h-[82px] w-auto object-contain sm:h-[112px] lg:h-[144px] my-[-8px]"
                     />
                 </Link>
 
                 <nav className="hidden gap-8 xl:flex">
-                    {links.map((l) => (
+                    {links.map((l, i) => (
                         <a
-                            key={l.href}
+                            key={`${l.href}-${i}`}
                             href={l.href}
                             className="label link-underline text-white/70 hover:text-white"
-                            data-testid={`nav-link-${l.label.toLowerCase()}`}
+                            data-testid={`nav-link-${(l.label || "").toLowerCase()}`}
+                            data-edit={`nav.links.${i}.label`}
                         >
                             {l.label}
                         </a>
@@ -74,14 +71,14 @@ export default function Nav() {
                                 data-testid="nav-signin"
                                 className="label link-underline text-white/70 hover:text-white"
                             >
-                                Sign in
+                                {N.signin_label}
                             </Link>
                             <Link
                                 to="/signup"
                                 data-testid="nav-signup"
                                 className="label link-underline text-white/70 hover:text-white"
                             >
-                                Sign up
+                                {N.signup_label}
                             </Link>
                         </>
                     )}
@@ -91,7 +88,9 @@ export default function Nav() {
                         className="group relative inline-flex items-center gap-3 border border-gold/50 px-4 py-2 text-[11px] tracking-[0.24em] uppercase font-medium text-white transition-colors duration-500 hover:text-ink"
                     >
                         <span className="absolute inset-0 origin-left scale-x-0 bg-gold transition-transform duration-500 group-hover:scale-x-100" />
-                        <span className="relative">Book Consultation</span>
+                        <span className="relative" data-edit="nav.cta_label">
+                            {N.cta_label}
+                        </span>
                         <span className="relative h-px w-5 bg-gold transition-all duration-500 group-hover:w-8 group-hover:bg-ink" />
                     </Link>
                 </div>
@@ -120,7 +119,7 @@ export default function Nav() {
                             >
                                 <div className="flex items-center justify-between border-b border-white/10 bg-ink px-4 py-3 sm:px-8">
                                     <img
-                                        src={LOGO_URL}
+                                        src={brand.logo_url}
                                         alt=""
                                         className="h-10 w-auto object-contain"
                                     />
@@ -136,7 +135,7 @@ export default function Nav() {
                                 <div className="flex flex-col items-start gap-5 px-8 py-8">
                                     {links.map((l, i) => (
                                         <motion.a
-                                            key={l.href}
+                                            key={`${l.href}-${i}`}
                                             href={l.href}
                                             onClick={() => setOpen(false)}
                                             initial={{ y: 20, opacity: 0 }}
@@ -146,7 +145,7 @@ export default function Nav() {
                                                 duration: 0.5,
                                             }}
                                             className="font-serif text-3xl italic text-white hover:text-gold transition-colors"
-                                            data-testid={`mobile-link-${l.label.toLowerCase()}`}
+                                            data-testid={`mobile-link-${(l.label || "").toLowerCase()}`}
                                         >
                                             {l.label}
                                         </motion.a>
@@ -177,7 +176,8 @@ export default function Nav() {
                                                 data-testid="mobile-signin"
                                                 className="inline-flex items-center gap-2 border border-white/20 px-5 py-3 label text-white/80"
                                             >
-                                                <LogIn className="h-4 w-4" /> Sign in
+                                                <LogIn className="h-4 w-4" />{" "}
+                                                {N.signin_label}
                                             </Link>
                                             <Link
                                                 to="/signup"
@@ -185,7 +185,8 @@ export default function Nav() {
                                                 data-testid="mobile-signup"
                                                 className="inline-flex items-center gap-2 border border-white/20 px-5 py-3 label text-white/80"
                                             >
-                                                <UserPlus className="h-4 w-4" /> Sign up
+                                                <UserPlus className="h-4 w-4" />{" "}
+                                                {N.signup_label}
                                             </Link>
                                         </div>
                                     )}
@@ -201,7 +202,7 @@ export default function Nav() {
                                             className="inline-flex items-center gap-3 border border-gold bg-gold px-6 py-3 label text-ink"
                                             data-testid="mobile-cta-book"
                                         >
-                                            Book Consultation
+                                            {N.cta_label}
                                         </Link>
                                     </motion.div>
                                 </div>

@@ -35,7 +35,17 @@ export default function AnnouncementBar() {
                                                 className="flex items-center gap-14"
                                                 data-testid={`announcement-msg-${i}`}
                                             >
-                                                <span>{m}</span>
+                                                <span
+                                                    data-edit={
+                                                        i === 0
+                                                            ? "banner.text"
+                                                            : i === 1
+                                                              ? "banner.secondary"
+                                                              : "banner.tertiary"
+                                                    }
+                                                >
+                                                    {m}
+                                                </span>
                                                 <span aria-hidden>✦</span>
                                             </span>
                                         ))}

@@ -5,7 +5,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { API } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { LOGO_URL } from "../lib/content";
+import { useContent } from "../lib/contentContext";
+import { useSeo } from "../lib/seo";
 import { LogOut, Calendar, ArrowRight } from "lucide-react";
 
 const statusColor = {
@@ -17,7 +18,15 @@ const statusColor = {
 };
 
 export default function Account() {
+    useSeo({
+        title: "My Account — Overall Beauty & Wellness",
+        description: "Your appointments.",
+        path: "/account",
+        noindex: true,
+    });
     const { user, signout, authHeader } = useAuth();
+    const { content } = useContent();
+    const LOGO_URL = content.brand?.logo_url;
     const nav = useNavigate();
     const [rows, setRows] = useState([]);
     const [loading, setLoading] = useState(true);

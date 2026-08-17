@@ -1,9 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LOGO_URL } from "./content";
+import { useContent } from "./contentContext";
 import { useAuth } from "./auth";
 
 export default function AuthShell({ title, subtitle, children, footer }) {
+    const { content } = useContent();
+    const LOGO_URL = content.brand?.logo_url;
     return (
         <div
             className="grain relative flex min-h-screen flex-col bg-ink text-white lg:flex-row"

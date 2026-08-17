@@ -1,9 +1,13 @@
 export const LOGO_URL =
     "https://customer-assets-m6fa6gv7.emergentagent.net/job_beauty-confidence-co-2/artifacts/qy8syx60_FullLogo%20%283%29%20ariel.png";
 
+export const HERO_IMAGE =
+    "https://images.unsplash.com/photo-1519668752166-ebdbfe986afd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxnbG93aW5nJTIwc2tpbiUyMHdvbWFuJTIwYmxhY2slMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc4NDYzODk5OHww&ixlib=rb-4.1.0&q=85";
+
 export const SERVICE_CATEGORIES = [
     {
         id: "injectables",
+        image: "https://images.pexels.com/photos/37229304/pexels-photo-37229304.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
         label: "Injectables",
         number: "01",
         blurb: "Refined enhancement. Natural definition.",
@@ -29,6 +33,7 @@ export const SERVICE_CATEGORIES = [
     },
     {
         id: "biostimulators",
+        image: "https://images.unsplash.com/photo-1610568129002-c01dc3cdd39c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxnb2xkJTIwbGlxdWlkJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzg0NjM4OTk4fDA&ixlib=rb-4.1.0&q=85",
         label: "Regenerative",
         number: "02",
         blurb: "Collagen restoration. Structural renewal.",
@@ -67,6 +72,7 @@ export const SERVICE_CATEGORIES = [
     },
     {
         id: "skin",
+        image: "https://images.unsplash.com/photo-1519668752166-ebdbfe986afd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxnbG93aW5nJTIwc2tpbiUyMHdvbWFuJTIwYmxhY2slMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc4NDYzODk5OHww&ixlib=rb-4.1.0&q=85",
         label: "Skin Rejuvenation",
         number: "03",
         blurb: "Luminous, restored, renewed skin.",
@@ -120,6 +126,7 @@ export const SERVICE_CATEGORIES = [
     },
     {
         id: "iv",
+        image: "https://images.unsplash.com/photo-1585960691786-a593e76d3847?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxpdiUyMGRyaXAlMjB0aGVyYXB5fGVufDB8fHx8MTc4NDYzODk5OXww&ixlib=rb-4.1.0&q=85",
         label: "IV Hydration Therapy",
         number: "04",
         blurb:
@@ -165,6 +172,7 @@ export const SERVICE_CATEGORIES = [
     },
     {
         id: "additional",
+        image: "https://images.pexels.com/photos/18788957/pexels-photo-18788957.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
         label: "Additional Services",
         number: "05",
         blurb: "Personalized medical care beyond the surface.",

@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { API } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { LOGO_URL } from "../lib/content";
+import { useContent } from "../lib/contentContext";
+import { useSeo } from "../lib/seo";
 import { LogOut, Search, ChevronDown, LayoutDashboard, Wand2 } from "lucide-react";
 import StudioEditor from "./StudioEditor";
 
@@ -19,7 +20,15 @@ const statusPill = {
 };
 
 export default function Studio() {
+    useSeo({
+        title: "Studio — Overall Beauty & Wellness",
+        description: "Staff panel.",
+        path: "/studio",
+        noindex: true,
+    });
     const { user, signout, authHeader } = useAuth();
+    const { content } = useContent();
+    const LOGO_URL = content.brand?.logo_url;
     const nav = useNavigate();
     const [sp, setSp] = useSearchParams();
     const tab = sp.get("tab") === "editor" ? "editor" : "bookings";

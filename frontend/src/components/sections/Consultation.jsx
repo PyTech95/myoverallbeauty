@@ -79,27 +79,41 @@ export default function Consultation() {
                     >
                         <div className="label mb-6 flex items-center gap-3 text-gold">
                             <span className="h-px w-10 bg-gold/60" />
-                            {C.eyebrow}
+                            <span data-edit="consultation.eyebrow">{C.eyebrow}</span>
                         </div>
                         <h2 className="font-serif text-4xl leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-6xl">
-                            {C.heading_line1} <br />
-                            {C.heading_line2}{" "}
-                            <em className="italic text-gold-gradient animate-shimmer">
+                            <span data-edit="consultation.heading_line1">
+                                {C.heading_line1}
+                            </span>{" "}
+                            <br />
+                            <span data-edit="consultation.heading_line2">
+                                {C.heading_line2}
+                            </span>{" "}
+                            <em
+                                className="italic text-gold-gradient animate-shimmer"
+                                data-edit="consultation.heading_italic"
+                            >
                                 {C.heading_italic}
                             </em>
                         </h2>
                         <div className="mt-8 space-y-5 text-white/70">
-                            <p>{C.body}</p>
-                            <p className="font-serif text-xl italic text-gold sm:text-2xl">
+                            <p data-edit="consultation.body">{C.body}</p>
+                            <p
+                                className="font-serif text-xl italic text-gold sm:text-2xl"
+                                data-edit="consultation.tag"
+                            >
                                 {C.tag}
                             </p>
                         </div>
                         <div className="mt-12 space-y-4 border-t border-white/10 pt-8">
                             {[
-                                { k: "Duration", v: "≈ 45 minutes" },
-                                { k: "With", v: content.founder.name + ", " + content.founder.title },
-                                { k: "Includes", v: "Personalized treatment plan" },
-                                { k: "Cost", v: "Complimentary" },
+                                { k: "Duration", v: C.duration, path: "consultation.duration" },
+                                {
+                                    k: "With",
+                                    v: content.founder.name + ", " + content.founder.title,
+                                },
+                                { k: "Includes", v: C.includes, path: "consultation.includes" },
+                                { k: "Cost", v: C.cost, path: "consultation.cost" },
                             ].map((s) => (
                                 <div
                                     key={s.k}
@@ -108,7 +122,10 @@ export default function Consultation() {
                                     <div className="label text-white/40">
                                         {s.k}
                                     </div>
-                                    <div className="font-serif text-lg italic text-white sm:text-xl">
+                                    <div
+                                        className="font-serif text-lg italic text-white sm:text-xl"
+                                        data-edit={s.path}
+                                    >
                                         {s.v}
                                     </div>
                                 </div>
@@ -275,13 +292,11 @@ export default function Consultation() {
                                         data-testid="c-submit"
                                         className="group relative inline-flex items-center gap-4 border border-gold bg-gold px-6 py-3.5 text-[11px] tracking-[0.24em] uppercase font-medium text-ink transition-transform duration-500 hover:translate-y-[-2px] disabled:opacity-60 sm:px-8 sm:py-4"
                                     >
-                                        {submitting
-                                            ? "Sending…"
-                                            : "Request Consultation"}
+                                        {submitting ? "Sending…" : C.submit_label}
                                         <span className="h-px w-8 bg-ink transition-all duration-500 group-hover:w-12" />
                                     </button>
                                     <div className="label text-white/40">
-                                        We reply within 1 business day.
+                                        {C.reply_note}
                                     </div>
                                 </div>
                             </form>

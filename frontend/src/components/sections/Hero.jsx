@@ -1,11 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { LOGO_URL } from "../../lib/content";
 import { useContent } from "../../lib/contentContext";
-
-const HERO_BG =
-    "https://images.unsplash.com/photo-1519668752166-ebdbfe986afd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxnbG93aW5nJTIwc2tpbiUyMHdvbWFuJTIwYmxhY2slMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc4NDYzODk5OHww&ixlib=rb-4.1.0&q=85";
 
 const line = {
     hidden: { y: "110%" },
@@ -79,6 +75,8 @@ export default function Hero() {
 
     const { content } = useContent();
     const H = content.hero;
+    const HERO_BG = H.image;
+    const LOGO = content.brand?.logo_url;
 
     return (
         <section
@@ -137,7 +135,7 @@ export default function Hero() {
                     loading="eager"
                 />
                 <div className="absolute right-3 top-6 z-20 rotate-180 [writing-mode:vertical-rl] label text-gold/80">
-                    Chapter 00 · The Invitation
+                    <span data-edit="hero.chapter_label">{H.chapter_label}</span>
                 </div>
             </motion.div>
 
@@ -153,9 +151,9 @@ export default function Hero() {
                         transition={{ delay: 0.5, duration: 0.9 }}
                         className="label text-white/50"
                     >
-                        Est. 2025 — Board-certified
+                        <span data-edit="hero.est_line1">{H.est_line1}</span>
                         <br />
-                        Family Nurse Practitioner
+                        <span data-edit="hero.est_line2">{H.est_line2}</span>
                     </motion.div>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -163,9 +161,7 @@ export default function Hero() {
                         transition={{ delay: 0.6, duration: 0.9 }}
                         className="label text-right text-white/50"
                     >
-                        Overall Beauty
-                        <br />
-                        & Wellness
+                        <span data-edit="brand.name">{content.brand?.name}</span>
                     </motion.div>
                 </div>
 
@@ -177,7 +173,7 @@ export default function Hero() {
                         className="label mb-6 flex items-center gap-3 text-gold sm:mb-8"
                     >
                         <span className="h-px w-8 bg-gold/60 sm:w-10" />
-                        {H.eyebrow}
+                        <span data-edit="hero.eyebrow">{H.eyebrow}</span>
                     </motion.div>
 
                     <h1
@@ -191,6 +187,7 @@ export default function Hero() {
                                 initial="hidden"
                                 animate="show"
                                 className="reveal-inner"
+                                data-edit="hero.line1"
                             >
                                 {H.line1}
                             </motion.span>
@@ -202,6 +199,7 @@ export default function Hero() {
                                 initial="hidden"
                                 animate="show"
                                 className="reveal-inner italic text-gold-gradient animate-shimmer"
+                                data-edit="hero.line2"
                             >
                                 {H.line2}
                             </motion.span>
@@ -214,6 +212,7 @@ export default function Hero() {
                                 initial="hidden"
                                 animate="show"
                                 className="reveal-inner"
+                                data-edit="hero.line3"
                             >
                                 {H.line3}
                             </motion.span>
@@ -225,6 +224,7 @@ export default function Hero() {
                                 initial="hidden"
                                 animate="show"
                                 className="reveal-inner italic"
+                                data-edit="hero.line4"
                             >
                                 {H.line4}
                             </motion.span>
@@ -253,7 +253,10 @@ export default function Hero() {
                     transition={{ delay: 1.4, duration: 0.9 }}
                     className="grid grid-cols-1 items-end gap-8 lg:grid-cols-3"
                 >
-                    <div className="max-w-md text-sm text-white/70 sm:text-base">
+                    <div
+                        className="max-w-md text-sm text-white/70 sm:text-base"
+                        data-edit="hero.subtitle"
+                    >
                         {H.subtitle}
                     </div>
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6 lg:justify-center">
@@ -262,28 +265,37 @@ export default function Hero() {
                             data-testid="hero-cta-consultation"
                             className="group relative inline-flex items-center gap-3 border border-gold bg-gold px-5 py-3 text-[11px] tracking-[0.24em] uppercase font-medium text-ink transition-transform duration-500 hover:translate-y-[-2px] sm:gap-4 sm:px-7 sm:py-4 sm:text-[12px]"
                         >
-                            Book Complimentary Consultation
+                            <span data-edit="hero.cta_primary">
+                                {H.cta_primary}
+                            </span>
                             <span className="h-px w-6 bg-ink transition-all duration-500 group-hover:w-10 sm:w-8 sm:group-hover:w-12" />
                         </Link>
                         <a
                             href="#services"
                             data-testid="hero-cta-services"
                             className="label link-underline text-white/70 hover:text-white"
+                            data-edit="hero.cta_secondary"
                         >
-                            View services
+                            {H.cta_secondary}
                         </a>
                     </div>
                     <div className="hidden items-center justify-end gap-6 lg:flex">
                         <div className="text-right">
-                            <div className="label text-white/50">
+                            <div
+                                className="label text-white/50"
+                                data-edit="hero.badge_top"
+                            >
                                 {H.badge_top}
                             </div>
-                            <div className="mt-1 font-serif text-2xl italic text-white">
+                            <div
+                                className="mt-1 font-serif text-2xl italic text-white"
+                                data-edit="hero.badge_bottom"
+                            >
                                 {H.badge_bottom}
                             </div>
                         </div>
                         <img
-                            src={LOGO_URL}
+                            src={LOGO}
                             alt="mark"
                             className="h-16 w-auto object-contain lg:h-20"
                         />
@@ -292,7 +304,9 @@ export default function Hero() {
             </div>
 
             <div className="absolute bottom-24 left-1/2 z-20 -translate-x-1/2 flex-col items-center gap-2 sm:bottom-6 sm:flex">
-                <div className="label text-white/40">Scroll</div>
+                <div className="label text-white/40" data-edit="hero.scroll_label">
+                    {H.scroll_label}
+                </div>
                 <motion.div
                     animate={{ scaleY: [0.2, 1, 0.2] }}
                     transition={{ duration: 2, repeat: Infinity }}

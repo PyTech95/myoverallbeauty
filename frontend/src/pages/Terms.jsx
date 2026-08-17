@@ -10,6 +10,8 @@ export default function Terms() {
         <LegalPage
             eyebrow="Legal"
             title="Terms of Service"
+            seoPath="/terms"
+            seoDescription="Terms governing consultations, bookings, deposits, cancellations and pricing at Overall Beauty & Wellness."
             updated={content.legal.effective_date}
         >
             <p>

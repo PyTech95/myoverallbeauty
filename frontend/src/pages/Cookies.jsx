@@ -8,6 +8,8 @@ export default function Cookies() {
         <LegalPage
             eyebrow="Cookies"
             title="Cookie Policy"
+            seoPath="/cookies"
+            seoDescription="How Overall Beauty & Wellness uses cookies and similar technologies on this website."
             updated={content.legal.effective_date}
         >
             <p>

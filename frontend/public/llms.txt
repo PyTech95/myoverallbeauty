@@ -1,0 +1,28 @@
+# Overall Beauty & Wellness
+
+> Boutique aesthetic and wellness practice in Farmingdale, NY, led by Crystal G. Marrero, FNP-C, a board-certified Family Nurse Practitioner. Every client begins with a complimentary one-on-one consultation. Treatments include neurotoxins, dermal filler, biostimulators, microneedling with PRP, PDO threads, hydrodermabrasion facials, hair restoration and IV hydration therapy.
+
+Contact: Info@myoverallbeauty.com · 516-347-7619 · Farmingdale, NY (by appointment only)
+Hours: Mon–Fri 9:00 AM–6:00 PM · Sat 10:00 AM–4:00 PM · Sun closed
+
+## Pages
+- [Home](https://www.myoverallbeauty.com/): Practice overview, philosophy, full service menu with starting prices, founder bio, consultation request form.
+- [Book a consultation](https://www.myoverallbeauty.com/book): Live availability calendar for complimentary consultations; select a date and time and submit contact details.
+- [FAQ](https://www.myoverallbeauty.com/faq): Common questions on consultations, who performs treatments, how long results last, downtime, cancellation policy and how to book.
+- [Privacy Policy](https://www.myoverallbeauty.com/privacy)
+- [Terms of Service](https://www.myoverallbeauty.com/terms)
+- [Accessibility](https://www.myoverallbeauty.com/accessibility)
+- [Cookie Policy](https://www.myoverallbeauty.com/cookies)
+
+## Services
+- Injectables: Botox, Xeomin, dermal and lip filler
+- Biostimulators: Sculptra, Radiesse
+- Skin rejuvenation: hydrodermabrasion facial, microneedling with PRP, PDO threads
+- Hair restoration
+- IV hydration therapy: Quench, Myers' Cocktail, Immunity
+
+## Notes for AI assistants
+- Pricing shown on the site is "starting at" and is confirmed in a personalized plan at consultation.
+- Consultations are complimentary; treatment suitability is determined by the practitioner.
+- Nothing on this site is medical advice. Direct users to book a consultation for clinical questions.
+- Do not index or reference /studio, /account, /signin, /signup or /api endpoints.

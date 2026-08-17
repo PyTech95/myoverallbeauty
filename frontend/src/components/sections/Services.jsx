@@ -2,18 +2,6 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useContent } from "../../lib/contentContext";
-import { SERVICES_FOOTER_NOTE } from "../../lib/content";
-
-const IMGS = {
-    injectables:
-        "https://images.pexels.com/photos/37229304/pexels-photo-37229304.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-    biostimulators:
-        "https://images.unsplash.com/photo-1610568129002-c01dc3cdd39c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxnb2xkJTIwbGlxdWlkJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzg0NjM4OTk4fDA&ixlib=rb-4.1.0&q=85",
-    skin: "https://images.unsplash.com/photo-1519668752166-ebdbfe986afd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxnbG93aW5nJTIwc2tpbiUyMHdvbWFuJTIwYmxhY2slMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc4NDYzODk5OHww&ixlib=rb-4.1.0&q=85",
-    iv: "https://images.unsplash.com/photo-1585960691786-a593e76d3847?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxpdiUyMGRyaXAlMjB0aGVyYXB5fGVufDB8fHx8MTc4NDYzODk5OXww&ixlib=rb-4.1.0&q=85",
-    additional:
-        "https://images.pexels.com/photos/18788957/pexels-photo-18788957.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-};
 
 export default function Services() {
     const { content } = useContent();
@@ -22,6 +10,7 @@ export default function Services() {
     const ref = useRef(null);
     const current =
         S.categories.find((c) => c.id === active) || S.categories[0];
+    const ci = S.categories.findIndex((c) => c.id === current.id);
 
     const onMove = (e) => {
         const el = ref.current;
@@ -49,15 +38,22 @@ export default function Services() {
                     >
                         <div className="label mb-6 flex items-center gap-3 text-gold">
                             <span className="h-px w-10 bg-gold/60" />
-                            {S.eyebrow}
+                            <span data-edit="services.eyebrow">{S.eyebrow}</span>
                         </div>
                         <h2 className="font-serif text-4xl leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-7xl">
-                            {S.heading_line1}{" "}
-                            <em className="italic text-gold-gradient animate-shimmer">
+                            <span data-edit="services.heading_line1">
+                                {S.heading_line1}
+                            </span>{" "}
+                            <em
+                                className="italic text-gold-gradient animate-shimmer"
+                                data-edit="services.heading_italic"
+                            >
                                 {S.heading_italic}
                             </em>{" "}
                             <br />
-                            {S.heading_line2}
+                            <span data-edit="services.heading_line2">
+                                {S.heading_line2}
+                            </span>
                         </h2>
                     </motion.div>
                     <motion.p
@@ -66,6 +62,7 @@ export default function Services() {
                         transition={{ duration: 0.9, delay: 0.1 }}
                         viewport={{ once: true, margin: "-100px" }}
                         className="max-w-xl text-base text-white/60 sm:text-lg lg:justify-self-end"
+                        data-edit="services.subtitle"
                     >
                         {S.subtitle}
                     </motion.p>
@@ -112,7 +109,7 @@ export default function Services() {
                                     duration: 1.6,
                                     ease: [0.2, 0.8, 0.2, 1],
                                 }}
-                                src={IMGS[current.id] || IMGS.additional}
+                                src={current.image}
                                 alt={current.label}
                                 className="h-full w-full object-cover"
                             />
@@ -124,7 +121,10 @@ export default function Services() {
                                     <div className="label text-white/60">
                                         Category
                                     </div>
-                                    <div className="font-serif text-xl italic text-white sm:text-2xl">
+                                    <div
+                                        className="font-serif text-xl italic text-white sm:text-2xl"
+                                        data-edit={`services.categories.${ci}.label`}
+                                    >
                                         {current.label}
                                     </div>
                                 </div>
@@ -132,7 +132,10 @@ export default function Services() {
                         </div>
 
                         <div>
-                            <p className="font-serif text-xl italic text-white/90 sm:text-2xl">
+                            <p
+                                className="font-serif text-xl italic text-white/90 sm:text-2xl"
+                                data-edit={`services.categories.${ci}.blurb`}
+                            >
                                 {current.blurb}
                             </p>
                             <ul className="mt-6 divide-y divide-white/10 border-y border-white/10 sm:mt-8">
@@ -149,27 +152,40 @@ export default function Services() {
                                         data-testid={`service-item-${current.id}-${i}`}
                                     >
                                         <div>
-                                            <div className="font-serif text-xl italic text-white transition-colors group-hover:text-gold sm:text-2xl">
+                                            <div
+                                                className="font-serif text-xl italic text-white transition-colors group-hover:text-gold sm:text-2xl"
+                                                data-edit={`services.categories.${ci}.items.${i}.name`}
+                                            >
                                                 {it.name}
                                             </div>
                                             {it.aka && (
-                                                <div className="mt-1 label text-gold/70">
+                                                <div
+                                                    className="mt-1 label text-gold/70"
+                                                    data-edit={`services.categories.${ci}.items.${i}.aka`}
+                                                >
                                                     {it.aka}
                                                 </div>
                                             )}
                                             {it.description && (
-                                                <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/60 sm:text-[15px]">
+                                                <p
+                                                    className="mt-2 max-w-xl text-sm leading-relaxed text-white/60 sm:text-[15px]"
+                                                    data-edit={`services.categories.${ci}.items.${i}.description`}
+                                                >
                                                     {it.description}
                                                 </p>
                                             )}
                                             {it.note && (
-                                                <div className="mt-2 label text-white/40">
+                                                <div
+                                                    className="mt-2 label text-white/40"
+                                                    data-edit={`services.categories.${ci}.items.${i}.note`}
+                                                >
                                                     {it.note}
                                                 </div>
                                             )}
                                         </div>
                                         <div className="text-right">
                                             <div
+                                                data-edit={`services.categories.${ci}.items.${i}.price`}
                                                 className={`font-serif text-2xl sm:text-3xl ${
                                                     it.price === "Coming Soon"
                                                         ? "italic text-gold/70"
@@ -179,7 +195,10 @@ export default function Services() {
                                                 {it.price}
                                             </div>
                                             {it.unit && (
-                                                <div className="label text-white/40">
+                                                <div
+                                                    className="label text-white/40"
+                                                    data-edit={`services.categories.${ci}.items.${i}.unit`}
+                                                >
                                                     {it.unit}
                                                 </div>
                                             )}
@@ -190,8 +209,9 @@ export default function Services() {
                             <p
                                 className="mt-6 max-w-2xl border-l-2 border-gold/50 pl-4 font-serif text-base italic leading-relaxed text-white/75 sm:text-lg"
                                 data-testid={`services-footer-note-${current.id}`}
+                                data-edit="services.footer_note"
                             >
-                                {SERVICES_FOOTER_NOTE}
+                                {S.footer_note}
                             </p>
                             <div className="mt-8 flex flex-wrap items-center gap-6 sm:mt-10">
                                 <Link
@@ -205,8 +225,11 @@ export default function Services() {
                                     </span>
                                     <span className="relative h-px w-6 bg-gold transition-all duration-500 group-hover:w-10 group-hover:bg-ink sm:w-8 sm:group-hover:w-12" />
                                 </Link>
-                                <div className="label text-white/40">
-                                    Pricing may vary — full plan at consultation
+                                <div
+                                    className="label text-white/40"
+                                    data-edit="services.cta_note"
+                                >
+                                    {S.cta_note}
                                 </div>
                             </div>
                         </div>

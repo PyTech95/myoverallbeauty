@@ -1,0 +1,47 @@
+{
+  "summary": "Verified the new editable-content surface + live in-place editor for Overall Beauty & Wellness. Backend pytest: 67/70 passing (same 3 SMTP-not-configured failures as prev iteration — expected). Frontend: homepage marquee correctly says 'Hydrodermabrasion' (bare 'Hydroderm' does not appear); all 13 Studio Editor tabs (brand, banner, marquee, hero, manifesto, founder, services, consultation, mission, contact, testimonials, footer, legal) render without crashing and with zero console errors; marquee edit/add/remove + save persists via GET /api/content; Live Editor works for staff (99 [data-edit] elements armed on homepage, hero.line1 edit published + survived full reload, Cancel correctly reverted hero.line2); Live Editor is hidden on /studio and hidden for anonymous + non-staff clients; mobile 390px looks clean on / and /book. FOUND ONE REAL BUG: 'Reset all to defaults' does NOT actually clear overrides in the DB — server merges with $set instead of replacing the doc, so sending {} is a no-op.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "PUT /api/content", "issue": "Uses {'$set': {**data,...}} so sending an empty overrides body ({}) is a no-op. As a result, the Studio Editor's 'Reset all to defaults' button (which POSTs {}) shows a success toast but leaves the existing override keys (hero, marquee, banner, testimonials, etc.) in MongoDB. Users cannot actually revert. Fix: replace with replace_one({'id':'main'}, {'id':'main', **data, 'updated_at':..., 'updated_by':...}, upsert=True) — or explicitly unset removed keys.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "N/A (SMTP)", "issue": "Same 3 pytest SMTP tests fail because EMERGENT_EMAIL_KEY / SMTP env vars are unset — expected in this preview env."},
+      {"endpoint": "GET /api/admin/stats", "issue": "Still not implemented (carried over from iteration_3). Not used by any current UI, so low urgency."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Studio Editor → Reset all to defaults", "issue": "Toast says 'Reverted to defaults.' but /api/content still returns overrides. Root cause is the backend PUT /api/content $set merge (see backend critical bug). To fully repro: log in as staff, in editor make any change and Save; click 'Reset all to defaults' → confirm; then curl /api/content → the override keys are still present.", "affected_selectors": ["[data-testid=\"editor-reset-all\"]"]}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_auth_and_roles.py",
+    "/app/backend/tests/test_iteration3.py",
+    "/app/backend/tests/test_iteration5.py",
+    "/app/backend/tests/test_iteration8_smtp.py",
+    "/app/backend/tests/test_uploads.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix PUT /api/content to fully replace the overrides document (or explicitly $unset any keys not present in the incoming payload) so that 'Reset all to defaults' (which sends {}) actually clears MongoDB.",
+    "Optional cleanup: convert deprecated @app.on_event startup/shutdown to FastAPI lifespan; still emitting DeprecationWarnings during pytest.",
+    "Optional: implement GET /api/admin/stats (carried over)."
+  ],
+  "critical_code_review_comments": [
+    "PUT /api/content merge-vs-replace mismatch is the root cause of the reset bug — the frontend's computeDiff() only sends changed keys, which is fine, but 'reset' cannot express deletions with the current $set model. Backend should either accept a full replacement (replace_one) or a diff format that includes deletions.",
+    "StudioEditor.jsx is 1365 lines — worth splitting per-section tab components for maintainability.",
+    "liveEdit.jsx correctly gates via user?.role === 'staff' and via loc.pathname.startsWith('/studio') — verified: anonymous & client role never see the toolbar, and /studio never shows it.",
+    "server.py still 817 lines in one file; still using deprecated on_event."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "96% (67/70 pytest; 3 = expected SMTP-not-configured)", "frontend": "~95% — 13/13 editor tabs render, live editor CRUD + cancel + role-gating all pass, only failure is 'Reset all to defaults' due to backend bug"},
+  "test_credentials": "Staff: crystal@overallbeauty.com / Overall2025! (from /app/memory/test_credentials.md). Also created ad-hoc client via /signup during role-gating test.",
+  "seed_data_creation": "During testing I saved overrides (marquee.words[0]='BotoxTEST', hero.line1='LiveTestValue'). Because 'Reset all to defaults' is broken, I manually cleared the content collection via a small motor script after testing. Verified: GET /api/content now returns {} — the public site is back to defaults for the client.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Live editor and Studio Editor tab surface are working. The only outstanding issue is that PUT /api/content is a merge, not a replace, so 'Reset all to defaults' cannot clear overrides. After main agent fixes PUT /api/content (replace_one), re-run the reset test: as staff, make any change → Save → click Reset all to defaults → curl /api/content should return {}. Backend pytest baseline is 67/70; SMTP 3 failures are expected until EMERGENT_EMAIL_KEY is configured.",
+  "rca_of_the_issue": "PUT /api/content in /app/backend/server.py:612-623 does `db.content.update_one({'id':'main'}, {'$set': {**data, ...}}, upsert=True)`. When data={} (the reset payload from StudioEditor.resetAllToDefaults → saveOverrides({})), the $set only updates updated_at/updated_by and leaves all previously-set override keys intact. Fix: use `db.content.replace_one({'id':'main'}, {'id':'main', **data, 'updated_at':..., 'updated_by':...}, upsert=True)` so a `{}` payload truly clears overrides. Reproduction: `curl -X PUT -H 'Authorization: Bearer <staff>' -H 'Content-Type: application/json' -d '{\"data\":{}}' /api/content` after any prior save → response still contains prior override keys."
+}

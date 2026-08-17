@@ -3,8 +3,15 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth, formatApiErrorDetail } from "../lib/auth";
 import AuthShell from "../lib/AuthShell";
+import { useSeo } from "../lib/seo";
 
 export default function SignIn() {
+    useSeo({
+        title: "Sign in — Overall Beauty & Wellness",
+        description: "Client and staff sign in.",
+        path: "/signin",
+        noindex: true,
+    });
     const { login } = useAuth();
     const nav = useNavigate();
     const loc = useLocation();

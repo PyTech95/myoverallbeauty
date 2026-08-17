@@ -9,6 +9,8 @@ export default function Privacy() {
         <LegalPage
             eyebrow="Privacy"
             title="Privacy Policy"
+            seoPath="/privacy"
+            seoDescription="How Overall Beauty & Wellness collects, uses and protects your personal and medical information."
             updated={content.legal.effective_date}
         >
             <p>

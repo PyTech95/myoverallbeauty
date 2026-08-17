@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import Home from "./pages/Home";
 import Book from "./pages/Book";
@@ -10,10 +10,12 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Accessibility from "./pages/Accessibility";
 import Cookies from "./pages/Cookies";
+import Faq from "./pages/Faq";
 import { AuthProvider } from "./lib/auth";
 import { ContentProvider } from "./lib/contentContext";
 import { RequireAuth } from "./lib/RequireAuth";
 import MobileActionBar from "./components/MobileActionBar";
+import LiveEditToolbar from "./lib/liveEdit";
 import "./App.css";
 
 function App() {
@@ -50,8 +52,11 @@ function App() {
                                 element={<Accessibility />}
                             />
                             <Route path="/cookies" element={<Cookies />} />
+                            <Route path="/faq" element={<Faq />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                         <MobileActionBar />
+                        <LiveEditToolbar />
                     </ContentProvider>
                 </AuthProvider>
             </BrowserRouter>

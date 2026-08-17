@@ -4,9 +4,28 @@ import { ArrowLeft } from "lucide-react";
 import Nav from "../components/Nav";
 import Footer from "../components/sections/Footer";
 import { useLenis } from "../lib/useLenis";
+import { useSeo, breadcrumbs } from "../lib/seo";
 
-export default function LegalPage({ eyebrow, title, updated, children }) {
+export default function LegalPage({
+    eyebrow,
+    title,
+    updated,
+    children,
+    seoPath,
+    seoDescription,
+}) {
     useLenis();
+    useSeo({
+        title: `${title} — Overall Beauty & Wellness`,
+        description:
+            seoDescription ||
+            `${title} for Overall Beauty & Wellness, an aesthetic and wellness practice in Farmingdale, NY.`,
+        path: seoPath || "/",
+        jsonLd: breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: title, path: seoPath || "/" },
+        ]),
+    });
     return (
         <main
             className="grain relative min-h-screen bg-ink text-white"

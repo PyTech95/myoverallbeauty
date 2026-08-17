@@ -8,21 +8,39 @@ import Booking from "../components/sections/Booking";
 import ScrollProgress from "../components/ScrollProgress";
 import { useLenis } from "../lib/useLenis";
 import { useContent } from "../lib/contentContext";
+import { useSeo, breadcrumbs, SITE_URL } from "../lib/seo";
 
 export default function Book() {
     useLenis();
     const { content } = useContent();
     const founder = content.founder;
 
+    useSeo({
+        title: "Book a Complimentary Consultation — Overall Beauty & Wellness",
+        description:
+            "Reserve your complimentary 45-minute consultation with Crystal G. Marrero, FNP-C in Farmingdale, NY. Pick a date and time that suits you and receive a personalized treatment plan.",
+        path: "/book",
+        jsonLd: [
+            {
+                "@context": "https://schema.org",
+                "@type": "ReserveAction",
+                name: "Book a complimentary consultation",
+                target: `${SITE_URL}/book`,
+                result: {
+                    "@type": "Reservation",
+                    name: "Complimentary Consultation",
+                    provider: { "@id": `${SITE_URL}/#business` },
+                },
+            },
+            breadcrumbs([
+                { name: "Home", path: "/" },
+                { name: "Book a Consultation", path: "/book" },
+            ]),
+        ],
+    });
+
     useEffect(() => {
-        // Set page title for SEO + tab clarity
-        const prev = document.title;
-        document.title =
-            "Book a Consultation — Overall Beauty & Wellness";
         window.scrollTo({ top: 0, behavior: "instant" });
-        return () => {
-            document.title = prev;
-        };
     }, []);
 
     const trust = [

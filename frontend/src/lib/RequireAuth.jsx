@@ -1,9 +1,11 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./auth";
+import { useSeo } from "./seo";
 
 export function RequireAuth({ children, staffOnly = false }) {
     const { user, ready } = useAuth();
     const location = useLocation();
+    useSeo({ path: location.pathname, noindex: true });
     if (!ready)
         return (
             <div

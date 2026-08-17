@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Save, RotateCcw, ChevronRight, ExternalLink, Plus, Trash2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { useContent } from "../lib/contentContext";
-import { DEFAULT_CONTENT, mergeContent } from "../lib/defaultContent";
+import { DEFAULT_CONTENT, mergeContent, computeDiff } from "../lib/defaultContent";
 import { API } from "../lib/api";
 import axios from "axios";
 
 const SECTIONS = [
+    { id: "brand", label: "Brand & menu" },
     { id: "banner", label: "Launch banner" },
     { id: "marquee", label: "Scrolling words" },
     { id: "hero", label: "Hero" },
@@ -17,12 +18,15 @@ const SECTIONS = [
     { id: "consultation", label: "Consultation" },
     { id: "mission", label: "Mission" },
     { id: "contact", label: "Contact & hours" },
+    { id: "testimonials", label: "Testimonials" },
+    { id: "faq", label: "FAQ" },
+    { id: "footer", label: "Footer labels" },
     { id: "legal", label: "Legal metadata" },
 ];
 
 export default function StudioEditor() {
     const { content, overrides, saveOverrides, refresh } = useContent();
-    const [active, setActive] = useState("banner");
+    const [active, setActive] = useState("brand");
     const [draft, setDraft] = useState(content);
     const [saving, setSaving] = useState(false);
     const [preview, setPreview] = useState(false);
@@ -168,6 +172,318 @@ export default function StudioEditor() {
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.35 }}
                     >
+                        {active === "brand" && (
+                            <SectionCard
+                                title="Brand & menu"
+                                hint="Logo, business name, footer blurb, and the navigation menu."
+                            >
+                                <ImageInput
+                                    label="Logo"
+                                    value={draft.brand?.logo_url || ""}
+                                    onChange={(v) => patch("brand", { logo_url: v })}
+                                    testid="editor-brand-logo"
+                                    aspect="1/1"
+                                />
+                                <TextInput
+                                    label="Business name"
+                                    value={draft.brand?.name || ""}
+                                    onChange={(v) => patch("brand", { name: v })}
+                                    testid="editor-brand-name"
+                                />
+                                <TextArea
+                                    label="Footer blurb"
+                                    value={draft.brand?.blurb || ""}
+                                    onChange={(v) => patch("brand", { blurb: v })}
+                                    testid="editor-brand-blurb"
+                                />
+                                <TextInput
+                                    label="Giant footer watermark"
+                                    value={draft.brand?.watermark || ""}
+                                    onChange={(v) => patch("brand", { watermark: v })}
+                                    testid="editor-brand-watermark"
+                                />
+                                <div className="mt-6 space-y-3">
+                                    <div className="label text-white/60">Menu links</div>
+                                    {(draft.nav?.links || []).map((l, i) => (
+                                        <div key={i} className="flex gap-2">
+                                            <input
+                                                className="field"
+                                                placeholder="Label"
+                                                value={l.label || ""}
+                                                data-testid={`editor-nav-label-${i}`}
+                                                onChange={(e) => {
+                                                    const arr = [...(draft.nav?.links || [])];
+                                                    arr[i] = { ...arr[i], label: e.target.value };
+                                                    patchNested("nav", "links", arr);
+                                                }}
+                                            />
+                                            <input
+                                                className="field"
+                                                placeholder="#section or /path"
+                                                value={l.href || ""}
+                                                data-testid={`editor-nav-href-${i}`}
+                                                onChange={(e) => {
+                                                    const arr = [...(draft.nav?.links || [])];
+                                                    arr[i] = { ...arr[i], href: e.target.value };
+                                                    patchNested("nav", "links", arr);
+                                                }}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const arr = [...(draft.nav?.links || [])];
+                                                    arr.splice(i, 1);
+                                                    patchNested("nav", "links", arr);
+                                                }}
+                                                className="shrink-0 border border-white/15 px-3 text-white/60 hover:border-red-400 hover:text-red-400"
+                                                aria-label="Remove link"
+                                                data-testid={`editor-nav-remove-${i}`}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() =>
+                                            patchNested("nav", "links", [
+                                                ...(draft.nav?.links || []),
+                                                { label: "", href: "#" },
+                                            ])
+                                        }
+                                        className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 label text-white/70 hover:border-gold hover:text-gold"
+                                        data-testid="editor-nav-add"
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> Add menu link
+                                    </button>
+                                </div>
+                                <div className="mt-6 grid grid-cols-3 gap-4">
+                                    <TextInput
+                                        label="Book button"
+                                        value={draft.nav?.cta_label || ""}
+                                        onChange={(v) => patch("nav", { cta_label: v })}
+                                        testid="editor-nav-cta"
+                                    />
+                                    <TextInput
+                                        label="Sign in label"
+                                        value={draft.nav?.signin_label || ""}
+                                        onChange={(v) => patch("nav", { signin_label: v })}
+                                        testid="editor-nav-signin"
+                                    />
+                                    <TextInput
+                                        label="Sign up label"
+                                        value={draft.nav?.signup_label || ""}
+                                        onChange={(v) => patch("nav", { signup_label: v })}
+                                        testid="editor-nav-signup"
+                                    />
+                                </div>
+                                <div className="mt-6 grid grid-cols-2 gap-4">
+                                    <TextInput
+                                        label="Mobile bar — call"
+                                        value={draft.mobile_bar?.call_label || ""}
+                                        onChange={(v) => patch("mobile_bar", { call_label: v })}
+                                        testid="editor-mobilebar-call"
+                                    />
+                                    <TextInput
+                                        label="Mobile bar — book"
+                                        value={draft.mobile_bar?.book_label || ""}
+                                        onChange={(v) => patch("mobile_bar", { book_label: v })}
+                                        testid="editor-mobilebar-book"
+                                    />
+                                </div>
+                            </SectionCard>
+                        )}
+
+                        {active === "testimonials" && (
+                            <SectionCard
+                                title="Testimonials"
+                                hint="Client quotes shown in the rotating carousel."
+                            >
+                                <TextInput
+                                    label="Section eyebrow"
+                                    value={draft.testimonials_meta?.eyebrow || ""}
+                                    onChange={(v) => patch("testimonials_meta", { eyebrow: v })}
+                                    testid="editor-testimonials-eyebrow"
+                                />
+                                <div className="mt-6 space-y-6">
+                                    {(draft.testimonials || []).map((t, i) => (
+                                        <div key={i} className="border border-white/10 p-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="label text-gold">
+                                                    Quote {i + 1}
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const arr = [...(draft.testimonials || [])];
+                                                        arr.splice(i, 1);
+                                                        setDraft({ ...draft, testimonials: arr });
+                                                    }}
+                                                    className="text-white/50 hover:text-red-400"
+                                                    aria-label="Remove testimonial"
+                                                    data-testid={`editor-testimonial-remove-${i}`}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                            <TextArea
+                                                label="Quote"
+                                                value={t.quote || ""}
+                                                onChange={(v) => {
+                                                    const arr = [...(draft.testimonials || [])];
+                                                    arr[i] = { ...arr[i], quote: v };
+                                                    setDraft({ ...draft, testimonials: arr });
+                                                }}
+                                                testid={`editor-testimonial-quote-${i}`}
+                                            />
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <TextInput
+                                                    label="Author"
+                                                    value={t.author || ""}
+                                                    onChange={(v) => {
+                                                        const arr = [...(draft.testimonials || [])];
+                                                        arr[i] = { ...arr[i], author: v };
+                                                        setDraft({ ...draft, testimonials: arr });
+                                                    }}
+                                                    testid={`editor-testimonial-author-${i}`}
+                                                />
+                                                <TextInput
+                                                    label="Role / treatment"
+                                                    value={t.role || ""}
+                                                    onChange={(v) => {
+                                                        const arr = [...(draft.testimonials || [])];
+                                                        arr[i] = { ...arr[i], role: v };
+                                                        setDraft({ ...draft, testimonials: arr });
+                                                    }}
+                                                    testid={`editor-testimonial-role-${i}`}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() =>
+                                            setDraft({
+                                                ...draft,
+                                                testimonials: [
+                                                    ...(draft.testimonials || []),
+                                                    { quote: "", author: "", role: "" },
+                                                ],
+                                            })
+                                        }
+                                        className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 label text-white/70 hover:border-gold hover:text-gold"
+                                        data-testid="editor-testimonial-add"
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> Add testimonial
+                                    </button>
+                                </div>
+                            </SectionCard>
+                        )}
+
+                        {active === "faq" && (
+                            <SectionCard
+                                title="FAQ page"
+                                hint="Questions & answers shown on /faq. These also feed Google's FAQ rich results."
+                            >
+                                <TextInput
+                                    label="Eyebrow"
+                                    value={draft.faq?.eyebrow || ""}
+                                    onChange={(v) => patch("faq", { eyebrow: v })}
+                                    testid="editor-faq-eyebrow"
+                                />
+                                <TextInput
+                                    label="Page title"
+                                    value={draft.faq?.title || ""}
+                                    onChange={(v) => patch("faq", { title: v })}
+                                    testid="editor-faq-title"
+                                />
+                                <TextArea
+                                    label="Intro paragraph"
+                                    value={draft.faq?.subtitle || ""}
+                                    onChange={(v) => patch("faq", { subtitle: v })}
+                                    testid="editor-faq-subtitle"
+                                />
+                                <div className="mt-6 space-y-6">
+                                    {(draft.faq?.items || []).map((it, i) => (
+                                        <div key={i} className="border border-white/10 p-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="label text-gold">
+                                                    Question {i + 1}
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const arr = [...(draft.faq?.items || [])];
+                                                        arr.splice(i, 1);
+                                                        patchNested("faq", "items", arr);
+                                                    }}
+                                                    className="text-white/50 hover:text-red-400"
+                                                    aria-label="Remove question"
+                                                    data-testid={`editor-faq-remove-${i}`}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                            <TextInput
+                                                label="Question"
+                                                value={it.q || ""}
+                                                onChange={(v) => {
+                                                    const arr = [...(draft.faq?.items || [])];
+                                                    arr[i] = { ...arr[i], q: v };
+                                                    patchNested("faq", "items", arr);
+                                                }}
+                                                testid={`editor-faq-q-${i}`}
+                                            />
+                                            <TextArea
+                                                label="Answer"
+                                                value={it.a || ""}
+                                                onChange={(v) => {
+                                                    const arr = [...(draft.faq?.items || [])];
+                                                    arr[i] = { ...arr[i], a: v };
+                                                    patchNested("faq", "items", arr);
+                                                }}
+                                                testid={`editor-faq-a-${i}`}
+                                            />
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() =>
+                                            patchNested("faq", "items", [
+                                                ...(draft.faq?.items || []),
+                                                { q: "", a: "" },
+                                            ])
+                                        }
+                                        className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 label text-white/70 hover:border-gold hover:text-gold"
+                                        data-testid="editor-faq-add"
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> Add question
+                                    </button>
+                                </div>
+                            </SectionCard>
+                        )}
+
+                        {active === "footer" && (
+                            <SectionCard
+                                title="Footer labels"
+                                hint="The small column headings in the footer."
+                            >
+                                <div className="grid grid-cols-2 gap-4">
+                                    {[
+                                        ["mission_label", "Mission label"],
+                                        ["explore_label", "Explore label"],
+                                        ["contact_label", "Contact label"],
+                                        ["legal_label", "Legal label"],
+                                        ["follow_label", "Follow label"],
+                                        ["hours_label", "Hours label"],
+                                        ["credit", "Bottom-right credit"],
+                                    ].map(([k, label]) => (
+                                        <TextInput
+                                            key={k}
+                                            label={label}
+                                            value={draft.footer?.[k] || ""}
+                                            onChange={(v) => patch("footer", { [k]: v })}
+                                            testid={`editor-footer-${k}`}
+                                        />
+                                    ))}
+                                </div>
+                            </SectionCard>
+                        )}
+
                         {active === "banner" && (
                             <SectionCard title="Launch banner" hint="Announcement bar at the top of the site.">
                                 <Toggle
@@ -247,6 +563,27 @@ export default function StudioEditor() {
 
                         {active === "hero" && (
                             <SectionCard title="Hero" hint="The kinetic headline & subtitle at the top of the home page.">
+                                <ImageInput
+                                    label="Background image"
+                                    value={draft.hero?.image || ""}
+                                    onChange={(v) => patch("hero", { image: v })}
+                                    testid="editor-hero-image"
+                                    aspect="16/9"
+                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <TextInput label="Top-left line 1"
+                                        value={draft.hero?.est_line1 || ""}
+                                        onChange={(v) => patch("hero", { est_line1: v })}
+                                        testid="editor-hero-est1" />
+                                    <TextInput label="Top-left line 2"
+                                        value={draft.hero?.est_line2 || ""}
+                                        onChange={(v) => patch("hero", { est_line2: v })}
+                                        testid="editor-hero-est2" />
+                                </div>
+                                <TextInput label="Vertical chapter label"
+                                    value={draft.hero?.chapter_label || ""}
+                                    onChange={(v) => patch("hero", { chapter_label: v })}
+                                    testid="editor-hero-chapter" />
                                 <TextInput label="Eyebrow"
                                     value={draft.hero?.eyebrow || ""}
                                     onChange={(v) => patch("hero", { eyebrow: v })}
@@ -274,6 +611,14 @@ export default function StudioEditor() {
                                     onChange={(v) => patch("hero", { subtitle: v })}
                                     testid="editor-hero-subtitle" />
                                 <div className="grid grid-cols-2 gap-4">
+                                    <TextInput label="Primary button"
+                                        value={draft.hero?.cta_primary || ""}
+                                        onChange={(v) => patch("hero", { cta_primary: v })}
+                                        testid="editor-hero-cta1" />
+                                    <TextInput label="Secondary link"
+                                        value={draft.hero?.cta_secondary || ""}
+                                        onChange={(v) => patch("hero", { cta_secondary: v })}
+                                        testid="editor-hero-cta2" />
                                     <TextInput label="Badge top"
                                         value={draft.hero?.badge_top || ""}
                                         onChange={(v) => patch("hero", { badge_top: v })}
@@ -282,12 +627,20 @@ export default function StudioEditor() {
                                         value={draft.hero?.badge_bottom || ""}
                                         onChange={(v) => patch("hero", { badge_bottom: v })}
                                         testid="editor-hero-badge-bottom" />
+                                    <TextInput label="Scroll hint"
+                                        value={draft.hero?.scroll_label || ""}
+                                        onChange={(v) => patch("hero", { scroll_label: v })}
+                                        testid="editor-hero-scroll" />
                                 </div>
                             </SectionCard>
                         )}
 
                         {active === "manifesto" && (
                             <SectionCard title="Manifesto" hint="Numbered chapters shown after the hero.">
+                                <TextInput label="Eyebrow"
+                                    value={draft.manifesto?.eyebrow || ""}
+                                    onChange={(v) => patch("manifesto", { eyebrow: v })}
+                                    testid="editor-manifesto-eyebrow" />
                                 <TextInput label="Title line 1"
                                     value={draft.manifesto?.title_line1 || ""}
                                     onChange={(v) => patch("manifesto", { title_line1: v })}
@@ -339,7 +692,21 @@ export default function StudioEditor() {
                         )}
 
                         {active === "founder" && (
-                            <SectionCard title="Founder" hint="Founder story and portrait.">
+                            <SectionCard title="Founder" hint="Founder story and plaque.">
+                                <div className="grid grid-cols-3 gap-4">
+                                    <TextInput label="Section eyebrow"
+                                        value={draft.founder?.eyebrow || ""}
+                                        onChange={(v) => patch("founder", { eyebrow: v })}
+                                        testid="editor-founder-eyebrow" />
+                                    <TextInput label="Plaque label"
+                                        value={draft.founder?.plaque_label || ""}
+                                        onChange={(v) => patch("founder", { plaque_label: v })}
+                                        testid="editor-founder-plaque" />
+                                    <TextInput label="Est. label"
+                                        value={draft.founder?.est_label || ""}
+                                        onChange={(v) => patch("founder", { est_label: v })}
+                                        testid="editor-founder-est" />
+                                </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <TextInput label="Name"
                                         value={draft.founder?.name || ""}
@@ -407,6 +774,69 @@ export default function StudioEditor() {
                                         <Plus className="h-3.5 w-3.5" /> Add paragraph
                                     </button>
                                 </div>
+                                <div className="mt-6 space-y-3">
+                                    <div className="label text-white/60">Highlight stats</div>
+                                    {(draft.founder?.stats || []).map((s, i) => (
+                                        <div key={i} className="flex gap-2">
+                                            <input
+                                                className="field"
+                                                placeholder="Small label"
+                                                value={s.k || ""}
+                                                data-testid={`editor-founder-stat-k-${i}`}
+                                                onChange={(e) => {
+                                                    const arr = [...(draft.founder?.stats || [])];
+                                                    arr[i] = { ...arr[i], k: e.target.value };
+                                                    patchNested("founder", "stats", arr);
+                                                }}
+                                            />
+                                            <input
+                                                className="field"
+                                                placeholder="Big italic value"
+                                                value={s.v || ""}
+                                                data-testid={`editor-founder-stat-v-${i}`}
+                                                onChange={(e) => {
+                                                    const arr = [...(draft.founder?.stats || [])];
+                                                    arr[i] = { ...arr[i], v: e.target.value };
+                                                    patchNested("founder", "stats", arr);
+                                                }}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const arr = [...(draft.founder?.stats || [])];
+                                                    arr.splice(i, 1);
+                                                    patchNested("founder", "stats", arr);
+                                                }}
+                                                className="shrink-0 border border-white/15 px-3 text-white/60 hover:border-red-400 hover:text-red-400"
+                                                aria-label="Remove stat"
+                                                data-testid={`editor-founder-stat-remove-${i}`}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() =>
+                                            patchNested("founder", "stats", [
+                                                ...(draft.founder?.stats || []),
+                                                { k: "", v: "" },
+                                            ])
+                                        }
+                                        className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 label text-white/70 hover:border-gold hover:text-gold"
+                                        data-testid="editor-founder-stat-add"
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> Add stat
+                                    </button>
+                                </div>
+                                <div className="mt-6 grid grid-cols-2 gap-4">
+                                    <TextInput label="Button label"
+                                        value={draft.founder?.cta_label || ""}
+                                        onChange={(v) => patch("founder", { cta_label: v })}
+                                        testid="editor-founder-cta" />
+                                    <TextInput label="Note beside button"
+                                        value={draft.founder?.cta_note || ""}
+                                        onChange={(v) => patch("founder", { cta_note: v })}
+                                        testid="editor-founder-cta-note" />
+                                </div>
                             </SectionCard>
                         )}
 
@@ -442,6 +872,30 @@ export default function StudioEditor() {
                                     value={draft.consultation?.tag || ""}
                                     onChange={(v) => patch("consultation", { tag: v })}
                                     testid="editor-consult-tag" />
+                                <div className="grid grid-cols-3 gap-4">
+                                    <TextInput label="Duration"
+                                        value={draft.consultation?.duration || ""}
+                                        onChange={(v) => patch("consultation", { duration: v })}
+                                        testid="editor-consult-duration" />
+                                    <TextInput label="Includes"
+                                        value={draft.consultation?.includes || ""}
+                                        onChange={(v) => patch("consultation", { includes: v })}
+                                        testid="editor-consult-includes" />
+                                    <TextInput label="Cost"
+                                        value={draft.consultation?.cost || ""}
+                                        onChange={(v) => patch("consultation", { cost: v })}
+                                        testid="editor-consult-cost" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <TextInput label="Submit button"
+                                        value={draft.consultation?.submit_label || ""}
+                                        onChange={(v) => patch("consultation", { submit_label: v })}
+                                        testid="editor-consult-submit" />
+                                    <TextInput label="Reply note"
+                                        value={draft.consultation?.reply_note || ""}
+                                        onChange={(v) => patch("consultation", { reply_note: v })}
+                                        testid="editor-consult-reply" />
+                                </div>
                             </SectionCard>
                         )}
 
@@ -636,6 +1090,22 @@ function ServicesEditor({ draft, setDraft }) {
                 }
                 testid="editor-services-subtitle"
             />
+            <TextArea
+                label="Closing note under every category"
+                value={draft.services?.footer_note || ""}
+                onChange={(v) =>
+                    setDraft({ ...draft, services: { ...(draft.services || {}), footer_note: v } })
+                }
+                testid="editor-services-footer-note"
+            />
+            <TextInput
+                label="Note beside the Book button"
+                value={draft.services?.cta_note || ""}
+                onChange={(v) =>
+                    setDraft({ ...draft, services: { ...(draft.services || {}), cta_note: v } })
+                }
+                testid="editor-services-cta-note"
+            />
 
             <div className="mt-8 space-y-8">
                 {cats.map((c, ci) => (
@@ -676,6 +1146,17 @@ function ServicesEditor({ draft, setDraft }) {
                                 testid={`editor-cat-${ci}-blurb`}
                             />
                         </div>
+                        <ImageInput
+                            label="Category image"
+                            value={c.image || ""}
+                            onChange={(v) => {
+                                const next = [...cats];
+                                next[ci] = { ...c, image: v };
+                                setCats(next);
+                            }}
+                            testid={`editor-cat-${ci}-image`}
+                            aspect="4/5"
+                        />
                         <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
                             {(c.items || []).map((it, ii) => (
                                 <div key={ii} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 items-center">
@@ -745,6 +1226,20 @@ function ServicesEditor({ draft, setDraft }) {
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </button>
+                                    <textarea
+                                        className="field col-span-full"
+                                        rows={2}
+                                        placeholder="Description"
+                                        value={it.description || ""}
+                                        data-testid={`editor-item-${ci}-${ii}-description`}
+                                        onChange={(e) => {
+                                            const next = [...cats];
+                                            const items = [...(next[ci].items || [])];
+                                            items[ii] = { ...it, description: e.target.value };
+                                            next[ci] = { ...c, items };
+                                            setCats(next);
+                                        }}
+                                    />
                                 </div>
                             ))}
                             <button
@@ -948,22 +1443,4 @@ function Toggle({ label, value, onChange, testid }) {
     );
 }
 
-// Compute a shallow-nested diff so we only persist overrides.
-function computeDiff(defaults, draft) {
-    if (Array.isArray(draft)) {
-        return JSON.stringify(draft) !== JSON.stringify(defaults) ? draft : undefined;
-    }
-    if (draft && typeof draft === "object") {
-        const out = {};
-        for (const k of Object.keys(draft)) {
-            const d = defaults?.[k];
-            const v = draft[k];
-            if (v !== undefined) {
-                const sub = computeDiff(d, v);
-                if (sub !== undefined) out[k] = sub;
-            }
-        }
-        return Object.keys(out).length ? out : undefined;
-    }
-    return draft !== defaults ? draft : undefined;
-}
+// Compute a nested diff so we only persist overrides (shared with the live editor).

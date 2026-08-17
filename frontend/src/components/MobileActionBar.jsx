@@ -37,7 +37,7 @@ export default function MobileActionBar() {
                     className="flex items-center justify-center gap-2 py-4 label text-white transition-colors active:bg-white/5"
                 >
                     <Phone className="h-4 w-4 text-gold" />
-                    Call now
+                    {content.mobile_bar?.call_label}
                 </a>
                 <Link
                     to="/book"
@@ -45,7 +45,7 @@ export default function MobileActionBar() {
                     className="flex items-center justify-center gap-2 bg-gold py-4 text-[11px] tracking-[0.24em] uppercase font-medium text-ink transition-colors active:bg-gold-soft"
                 >
                     <Calendar className="h-4 w-4" />
-                    Book consultation
+                    {content.mobile_bar?.book_label}
                 </Link>
             </div>
         </motion.div>
