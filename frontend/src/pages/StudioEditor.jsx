@@ -522,10 +522,32 @@ export default function StudioEditor() {
                                 </label>
                                 <div className="grid grid-cols-2 gap-4">
                                     <TextInput
-                                        label="Video file or URL"
+                                        label="Desktop video (file or URL)"
                                         value={draft.promo_video?.src || ""}
                                         onChange={(v) => patch("promo_video", { src: v })}
                                         testid="editor-promo-src"
+                                    />
+                                    <TextInput
+                                        label="Mobile video (portrait)"
+                                        value={draft.promo_video?.src_mobile || ""}
+                                        onChange={(v) =>
+                                            patch("promo_video", { src_mobile: v })
+                                        }
+                                        testid="editor-promo-src-mobile"
+                                    />
+                                    <TextInput
+                                        label="Desktop .webm (optional)"
+                                        value={draft.promo_video?.src_webm || ""}
+                                        onChange={(v) => patch("promo_video", { src_webm: v })}
+                                        testid="editor-promo-src-webm"
+                                    />
+                                    <TextInput
+                                        label="Mobile .webm (optional)"
+                                        value={draft.promo_video?.src_mobile_webm || ""}
+                                        onChange={(v) =>
+                                            patch("promo_video", { src_mobile_webm: v })
+                                        }
+                                        testid="editor-promo-src-mobile-webm"
                                     />
                                     <TextInput
                                         label="Delay before it opens (seconds)"

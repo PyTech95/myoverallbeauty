@@ -42,7 +42,8 @@ Public marketing site; multi-step booking with live availability; double-booking
 
 ## Pop-up video (2026-06, iteration 4)
 - Grand Opening video pop-up on the home page: opens 5s after load, once per browser session, muted autoplay + loop with an unmute toggle, rotating gold close button, "Book Consultation" CTA and "Maybe later" dismiss, Esc/backdrop close
-- Video stored at `frontend/public/promo.mp4` with a VP9 `promo.webm` fallback source (headless/older browsers)
+- Video stored at `frontend/public/promo.mp4` (landscape, desktop) and `promo_mobile.mp4` (portrait, with music, shown ≤767px), each with a VP9 `.webm` fallback source; `promo_mobile_alt.mp4` kept as a spare portrait cut
+- Separate desktop/mobile video URLs are editable in the Studio pop-up tab
 - Fully editable in **Studio → Editor → Pop-up video** (on/off, once-per-visit, file/URL, delay seconds, title, subtitle, button labels); title/subtitle/labels also live-editable
 
 ## Known Gaps

@@ -167,6 +167,8 @@ export const DEFAULT_CONTENT = {
         enabled: true,
         src: "/promo.mp4",
         src_webm: "/promo.webm",
+        src_mobile: "/promo_mobile.mp4",
+        src_mobile_webm: "/promo_mobile.webm",
         delay_seconds: 5,
         once_per_visit: true,
         title: "Grand Opening — Sunday, August 30th",

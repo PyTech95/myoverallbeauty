@@ -11,17 +11,36 @@ export default function PromoVideo() {
     const V = content.promo_video || {};
     const [open, setOpen] = useState(false);
     const [muted, setMuted] = useState(true);
+    const [isMobile, setIsMobile] = useState(
+        () =>
+            typeof window !== "undefined" &&
+            window.matchMedia("(max-width: 767px)").matches,
+    );
     const videoRef = useRef(null);
 
     useEffect(() => {
-        if (!V.enabled || !V.src) return;
+        const mq = window.matchMedia("(max-width: 767px)");
+        const onChange = (e) => setIsMobile(e.matches);
+        mq.addEventListener("change", onChange);
+        return () => mq.removeEventListener("change", onChange);
+    }, []);
+
+    const mp4 = (isMobile && V.src_mobile) || V.src;
+    const webm = isMobile
+        ? V.src_mobile && V.src_mobile_webm
+            ? V.src_mobile_webm
+            : null
+        : V.src_webm;
+
+    useEffect(() => {
+        if (!V.enabled || !mp4) return;
         if (V.once_per_visit && sessionStorage.getItem(SEEN_KEY)) return;
         const t = setTimeout(
             () => setOpen(true),
             Math.max(0, Number(V.delay_seconds ?? 5)) * 1000,
         );
         return () => clearTimeout(t);
-    }, [V.enabled, V.src, V.delay_seconds, V.once_per_visit]);
+    }, [V.enabled, mp4, V.delay_seconds, V.once_per_visit]);
 
     useEffect(() => {
         if (!open) return;
@@ -39,7 +58,7 @@ export default function PromoVideo() {
         if (!v.muted) v.play().catch(() => {});
     }
 
-    if (!V.enabled || !V.src) return null;
+    if (!V.enabled || !mp4) return null;
 
     return (
         <AnimatePresence>
@@ -62,7 +81,9 @@ export default function PromoVideo() {
                         exit={{ opacity: 0, scale: 0.95, y: 12 }}
                         transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative w-full max-w-[640px] border border-gold/40 bg-ink shadow-[0_40px_120px_rgba(0,0,0,0.7)]"
+                        className={`relative w-full border border-gold/40 bg-ink shadow-[0_40px_120px_rgba(0,0,0,0.7)] ${
+                            isMobile && V.src_mobile ? "max-w-[400px]" : "max-w-[640px]"
+                        }`}
                         data-testid="promo-video-modal"
                     >
                         <button
@@ -76,22 +97,23 @@ export default function PromoVideo() {
 
                         <video
                             ref={videoRef}
+                            key={mp4}
                             autoPlay
                             muted
                             loop
                             playsInline
-                            className="block h-auto w-full"
+                            className="block h-auto max-h-[62vh] w-full object-contain sm:max-h-[70vh]"
                             data-testid="promo-video-player"
                         >
-                            {V.src_webm && <source src={V.src_webm} type="video/webm" />}
-                            <source src={V.src} type="video/mp4" />
+                            {webm && <source src={webm} type="video/webm" />}
+                            <source src={mp4} type="video/mp4" />
                         </video>
 
                         <button
                             onClick={toggleSound}
                             aria-label={muted ? "Unmute" : "Mute"}
                             data-testid="promo-video-sound"
-                            className="absolute bottom-[104px] right-3 grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/60 text-white/80 backdrop-blur transition-colors hover:border-gold hover:text-gold sm:bottom-[112px]"
+                            className="absolute left-3 top-3 grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/60 text-white/80 backdrop-blur transition-colors hover:border-gold hover:text-gold"
                         >
                             {muted ? (
                                 <VolumeX className="h-4 w-4" />
