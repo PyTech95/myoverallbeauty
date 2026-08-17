@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Save, RotateCcw, ChevronRight, ExternalLink, Plus, Trash2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Save, RotateCcw, ChevronRight, ExternalLink, Plus, Trash2, Upload, X, Image as ImageIcon, Film } from "lucide-react";
 import { useContent } from "../lib/contentContext";
 import { DEFAULT_CONTENT, mergeContent, computeDiff } from "../lib/defaultContent";
 import { API } from "../lib/api";
@@ -520,35 +520,28 @@ export default function StudioEditor() {
                                         Only once per visit
                                     </span>
                                 </label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <TextInput
-                                        label="Desktop video (file or URL)"
+                                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                    <VideoInput
+                                        label="Desktop video (landscape)"
                                         value={draft.promo_video?.src || ""}
-                                        onChange={(v) => patch("promo_video", { src: v })}
-                                        testid="editor-promo-src"
+                                        onChange={(v) =>
+                                            patch("promo_video", { src: v, src_webm: "" })
+                                        }
+                                        testid="promo-src"
                                     />
-                                    <TextInput
+                                    <VideoInput
                                         label="Mobile video (portrait)"
                                         value={draft.promo_video?.src_mobile || ""}
                                         onChange={(v) =>
-                                            patch("promo_video", { src_mobile: v })
+                                            patch("promo_video", {
+                                                src_mobile: v,
+                                                src_mobile_webm: "",
+                                            })
                                         }
-                                        testid="editor-promo-src-mobile"
+                                        testid="promo-src-mobile"
                                     />
-                                    <TextInput
-                                        label="Desktop .webm (optional)"
-                                        value={draft.promo_video?.src_webm || ""}
-                                        onChange={(v) => patch("promo_video", { src_webm: v })}
-                                        testid="editor-promo-src-webm"
-                                    />
-                                    <TextInput
-                                        label="Mobile .webm (optional)"
-                                        value={draft.promo_video?.src_mobile_webm || ""}
-                                        onChange={(v) =>
-                                            patch("promo_video", { src_mobile_webm: v })
-                                        }
-                                        testid="editor-promo-src-mobile-webm"
-                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
                                     <TextInput
                                         label="Delay before it opens (seconds)"
                                         value={String(draft.promo_video?.delay_seconds ?? 5)}
@@ -559,6 +552,22 @@ export default function StudioEditor() {
                                         }
                                         testid="editor-promo-delay"
                                     />
+                                    <label className="block">
+                                        <div className="label mb-2 text-white/50">
+                                            Stop showing after (date)
+                                        </div>
+                                        <input
+                                            type="date"
+                                            className="field"
+                                            value={draft.promo_video?.expires_on || ""}
+                                            data-testid="editor-promo-expires"
+                                            onChange={(e) =>
+                                                patch("promo_video", {
+                                                    expires_on: e.target.value,
+                                                })
+                                            }
+                                        />
+                                    </label>
                                 </div>
                                 <TextInput
                                     label="Title"
@@ -586,6 +595,54 @@ export default function StudioEditor() {
                                             patch("promo_video", { dismiss_label: v })
                                         }
                                         testid="editor-promo-dismiss"
+                                    />
+                                </div>
+                                <div className="mt-6 border-t border-white/10 pt-6">
+                                    <div className="label text-gold">Event RSVP</div>
+                                    <label className="flex items-center gap-3 py-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={!!draft.promo_video?.rsvp_enabled}
+                                            data-testid="editor-promo-rsvp-enabled"
+                                            onChange={(e) =>
+                                                patch("promo_video", {
+                                                    rsvp_enabled: e.target.checked,
+                                                })
+                                            }
+                                        />
+                                        <span className="text-sm text-white/80">
+                                            Let visitors RSVP from the pop-up
+                                        </span>
+                                    </label>
+                                    <TextInput
+                                        label="Event name (shown on the guest list)"
+                                        value={draft.promo_video?.event_name || ""}
+                                        onChange={(v) => patch("promo_video", { event_name: v })}
+                                        testid="editor-promo-event-name"
+                                    />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <TextInput
+                                            label="RSVP button label"
+                                            value={draft.promo_video?.rsvp_label || ""}
+                                            onChange={(v) =>
+                                                patch("promo_video", { rsvp_label: v })
+                                            }
+                                            testid="editor-promo-rsvp-label"
+                                        />
+                                        <TextInput
+                                            label="Thank-you message"
+                                            value={draft.promo_video?.rsvp_success || ""}
+                                            onChange={(v) =>
+                                                patch("promo_video", { rsvp_success: v })
+                                            }
+                                            testid="editor-promo-rsvp-success"
+                                        />
+                                    </div>
+                                    <TextArea
+                                        label="Note above the RSVP form"
+                                        value={draft.promo_video?.rsvp_note || ""}
+                                        onChange={(v) => patch("promo_video", { rsvp_note: v })}
+                                        testid="editor-promo-rsvp-note"
                                     />
                                 </div>
                             </SectionCard>
@@ -1406,6 +1463,115 @@ function TextArea({ label, value, onChange, testid }) {
         </label>
     );
 }
+function VideoInput({ label, value, onChange, testid }) {
+    const fileRef = useRef(null);
+    const [uploading, setUploading] = useState(false);
+    const backendOrigin = (process.env.REACT_APP_BACKEND_URL || "").replace(/\/$/, "");
+    const resolveUrl = (u) =>
+        !u ? "" : u.startsWith("/api/") ? `${backendOrigin}${u}` : u;
+
+    async function onFile(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith("video/")) {
+            toast.error("Please pick a video file.");
+            return;
+        }
+        if (file.size > 40 * 1024 * 1024) {
+            toast.error("Video too large. Maximum 40 MB.");
+            return;
+        }
+        setUploading(true);
+        try {
+            const fd = new FormData();
+            fd.append("file", file);
+            const token = localStorage.getItem("obw_token");
+            const { data } = await axios.post(`${API}/uploads/video`, fd, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+            });
+            onChange(data.url);
+            toast.success("Video uploaded.");
+        } catch (err) {
+            const msg = err?.response?.data?.detail || "Upload failed.";
+            toast.error(typeof msg === "string" ? msg : "Upload failed.");
+        } finally {
+            setUploading(false);
+            if (fileRef.current) fileRef.current.value = "";
+        }
+    }
+
+    return (
+        <div className="block" data-testid={`vidinput-${testid}`}>
+            <div className="label mb-2 text-white/50">{label}</div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div
+                    className="flex-shrink-0 overflow-hidden border border-gold/30 bg-white/5"
+                    style={{ width: 128 }}
+                    data-testid={`vidinput-${testid}-preview`}
+                >
+                    {value ? (
+                        <video
+                            src={resolveUrl(value)}
+                            muted
+                            loop
+                            playsInline
+                            autoPlay
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <div className="grid h-20 w-full place-items-center text-white/30">
+                            <Film className="h-6 w-6" strokeWidth={1.4} />
+                        </div>
+                    )}
+                </div>
+                <div className="flex flex-1 flex-col gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => fileRef.current?.click()}
+                            disabled={uploading}
+                            data-testid={`vidinput-${testid}-upload`}
+                            className="inline-flex items-center gap-2 border border-gold bg-gold px-4 py-2 label text-ink transition-transform hover:translate-y-[-1px] disabled:opacity-50"
+                        >
+                            <Upload className="h-3.5 w-3.5" />
+                            {uploading ? "Uploading…" : value ? "Replace video" : "Upload video"}
+                        </button>
+                        {value && (
+                            <button
+                                type="button"
+                                onClick={() => onChange("")}
+                                data-testid={`vidinput-${testid}-clear`}
+                                className="inline-flex items-center gap-2 border border-white/20 px-4 py-2 label text-white/70 hover:border-white/40 hover:text-white"
+                            >
+                                <X className="h-3.5 w-3.5" /> Remove
+                            </button>
+                        )}
+                        <input
+                            ref={fileRef}
+                            type="file"
+                            accept="video/*"
+                            onChange={onFile}
+                            data-testid={`vidinput-${testid}-file`}
+                            className="hidden"
+                        />
+                    </div>
+                    <div className="label text-white/40">MP4, WebM or MOV · max 40 MB</div>
+                    <input
+                        className="field"
+                        placeholder="Or paste a video URL…"
+                        value={value || ""}
+                        onChange={(e) => onChange(e.target.value)}
+                        data-testid={`vidinput-${testid}-url`}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function ImageInput({ label, value, onChange, testid, aspect = "3/4" }) {
     const fileRef = useRef(null);
     const [uploading, setUploading] = useState(false);

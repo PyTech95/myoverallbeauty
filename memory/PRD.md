@@ -46,6 +46,13 @@ Public marketing site; multi-step booking with live availability; double-booking
 - Separate desktop/mobile video URLs are editable in the Studio pop-up tab
 - Fully editable in **Studio → Editor → Pop-up video** (on/off, once-per-visit, file/URL, delay seconds, title, subtitle, button labels); title/subtitle/labels also live-editable
 
+## Event RSVP / auto-expiry / video upload (2026-06, iteration 5)
+- **RSVP** from inside the pop-up: `POST /api/rsvps` (public, upserts on email+event), staff-only `GET /api/rsvps`, `/rsvps/summary`, `PATCH /rsvps/{id}/status` (going|maybe|cancelled), `DELETE /rsvps/{id}`; confirmation + owner-notification emails wired through `send_email` (no-ops until email keys exist)
+- New **Studio → RSVPs** tab (`?tab=rsvps`): stat cards, "Heads coming" total, status filters, search, status change, delete, CSV export
+- **Auto-expiry**: `promo_video.expires_on` date — pop-up hides itself after that day (editable date field in the pop-up tab)
+- **Upload from Studio**: `POST /api/uploads/video` (staff-only, mp4/webm/mov, 40 MB cap, 415/413 errors) + `VideoInput` widget with preview/replace/remove for both desktop and mobile videos
+- Verified by testing agent (iteration_7): 23/23 backend cases + all frontend flows pass; fixed a first-load auth race in the RSVP panel afterwards
+
 ## Known Gaps
 - **Email/SMS NOT configured** — booking + contact succeed but no confirmation emails are sent (needs Resend/SMTP keys)
 - `GET /api/admin/stats` not implemented (not used by the frontend)

@@ -176,6 +176,12 @@ export const DEFAULT_CONTENT = {
             "12PM–4PM · 208 Airport Plaza Boulevard, Suite 8, Farmingdale, NY · Free giveaways, raffles & beauty demos. Stop by and say hi.",
         cta_label: "Book Consultation",
         dismiss_label: "Maybe later",
+        expires_on: "2026-08-31",
+        rsvp_enabled: true,
+        rsvp_label: "RSVP to the event",
+        rsvp_note: "Let us know you're coming and we'll save you a spot.",
+        rsvp_success: "You're on the list — see you there!",
+        event_name: "Grand Opening — Sunday, August 30th",
     },
     faq: {
         eyebrow: "Questions",

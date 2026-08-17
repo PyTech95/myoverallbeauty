@@ -7,8 +7,9 @@ import { API } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useContent } from "../lib/contentContext";
 import { useSeo } from "../lib/seo";
-import { LogOut, Search, ChevronDown, LayoutDashboard, Wand2 } from "lucide-react";
+import { LogOut, Search, ChevronDown, LayoutDashboard, Wand2, PartyPopper } from "lucide-react";
 import StudioEditor from "./StudioEditor";
+import RsvpPanel from "./RsvpPanel";
 
 const STATUSES = ["new", "contacted", "scheduled", "completed", "cancelled"];
 const statusPill = {
@@ -31,7 +32,9 @@ export default function Studio() {
     const LOGO_URL = content.brand?.logo_url;
     const nav = useNavigate();
     const [sp, setSp] = useSearchParams();
-    const tab = sp.get("tab") === "editor" ? "editor" : "bookings";
+    const tab = ["editor", "rsvps"].includes(sp.get("tab"))
+        ? sp.get("tab")
+        : "bookings";
 
     return (
         <div className="grain min-h-screen bg-ink text-white" data-testid="studio-page">
@@ -61,6 +64,19 @@ export default function Studio() {
                         >
                             <LayoutDashboard className="h-3.5 w-3.5" />
                             <span className="hidden sm:inline">Bookings</span>
+                        </button>
+                        <button
+                            onClick={() => setSp({ tab: "rsvps" })}
+                            data-testid="studio-tab-rsvps"
+                            data-active={tab === "rsvps"}
+                            className={`inline-flex items-center gap-2 border px-3 py-2 label transition-colors sm:px-4 ${
+                                tab === "rsvps"
+                                    ? "border-gold text-gold"
+                                    : "border-white/15 text-white/60 hover:border-white/40 hover:text-white"
+                            }`}
+                        >
+                            <PartyPopper className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">RSVPs</span>
                         </button>
                         <button
                             onClick={() => setSp({ tab: "editor" })}
@@ -101,6 +117,16 @@ export default function Studio() {
                             transition={{ duration: 0.35 }}
                         >
                             <BookingsPanel authHeader={authHeader} />
+                        </motion.div>
+                    ) : tab === "rsvps" ? (
+                        <motion.div
+                            key="rsvps"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.35 }}
+                        >
+                            <RsvpPanel authHeader={authHeader} />
                         </motion.div>
                     ) : (
                         <motion.div

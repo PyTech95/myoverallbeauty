@@ -60,6 +60,8 @@ UPLOAD_DIR = ROOT_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"}
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024  # 8 MB
+MAX_VIDEO_BYTES = 40 * 1024 * 1024  # 40 MB
+ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm", "video/quicktime"}
 
 
 # ---------- Helpers ----------
@@ -187,6 +189,33 @@ class ContentIn(BaseModel):
     """Free-form JSON site content payload — validated shallowly."""
     model_config = ConfigDict(extra="allow")
     data: dict = Field(default_factory=dict)
+
+
+class RsvpCreate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    name: str = Field(..., min_length=1, max_length=120)
+    email: EmailStr
+    phone: Optional[str] = Field(default=None, max_length=32)
+    guests: int = Field(default=1, ge=1, le=10)
+    note: Optional[str] = Field(default=None, max_length=500)
+    event: Optional[str] = Field(default=None, max_length=160)
+
+
+class Rsvp(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    guests: int = 1
+    note: Optional[str] = None
+    event: Optional[str] = None
+    status: str = "going"
+    created_at: str
+
+
+class RsvpStatusUpdate(BaseModel):
+    status: str = Field(..., pattern="^(going|maybe|cancelled)$")
 
 
 class ScheduleConfig(BaseModel):
@@ -602,6 +631,100 @@ async def create_contact(payload: ContactCreate):
     return {"status": "ok", "id": doc["id"]}
 
 
+# --- Event RSVPs ---
+@api_router.post("/rsvps")
+async def create_rsvp(payload: RsvpCreate):
+    existing = await db.rsvps.find_one(
+        {"email": payload.email.lower(), "event": payload.event}
+    )
+    doc = {
+        "id": existing["id"] if existing else str(uuid.uuid4()),
+        "name": payload.name,
+        "email": payload.email.lower(),
+        "phone": payload.phone,
+        "guests": payload.guests,
+        "note": payload.note,
+        "event": payload.event,
+        "status": "going",
+        "created_at": existing["created_at"] if existing else now_iso(),
+    }
+    await db.rsvps.replace_one({"id": doc["id"]}, doc, upsert=True)
+
+    guest_html = (
+        f'<div style="font-family:Arial,sans-serif;padding:24px;background:#F9F6F0;">'
+        f'<h2 style="font-family:Georgia,serif;color:#0A0A0A;">You\'re on the list, {payload.name}!</h2>'
+        f'<p>Thank you for your RSVP to <b>{payload.event or "our event"}</b>.</p>'
+        f'<p><b>Guests:</b> {payload.guests}</p>'
+        f'<p>We can\'t wait to welcome you. If your plans change, just reply to this email.</p>'
+        f'<p style="color:#8A7B4F;">— {EMAIL_FROM_NAME}</p>'
+        f"</div>"
+    )
+    await send_email(
+        recipient=payload.email,
+        subject=f"RSVP confirmed — {payload.event or EMAIL_FROM_NAME}",
+        html=guest_html,
+    )
+    staff_html = (
+        f'<div style="font-family:Arial,sans-serif;padding:24px;background:#F9F6F0;">'
+        f'<h2 style="font-family:Georgia,serif;color:#0A0A0A;">New Event RSVP</h2>'
+        f'<p><b>Event:</b> {payload.event or "—"}</p>'
+        f'<p><b>Name:</b> {payload.name}</p>'
+        f'<p><b>Email:</b> {payload.email}</p>'
+        f'<p><b>Phone:</b> {payload.phone or "—"}</p>'
+        f'<p><b>Guests:</b> {payload.guests}</p>'
+        f'<p><b>Note:</b> {payload.note or "—"}</p>'
+        f"</div>"
+    )
+    for biz in BUSINESS_EMAILS:
+        await send_email(
+            recipient=biz,
+            subject=f"RSVP — {payload.name} (+{payload.guests - 1})",
+            html=staff_html,
+            reply_to=payload.email,
+        )
+    return {"status": "ok", "id": doc["id"], "updated": bool(existing)}
+
+
+@api_router.get("/rsvps", response_model=List[Rsvp])
+async def list_rsvps(user: dict = Depends(require_staff)):
+    cur = db.rsvps.find({}, {"_id": 0}).sort("created_at", -1)
+    return await cur.to_list(1000)
+
+
+@api_router.get("/rsvps/summary")
+async def rsvp_summary(user: dict = Depends(require_staff)):
+    rows = await db.rsvps.find({}, {"_id": 0}).to_list(2000)
+    going = [r for r in rows if r.get("status") == "going"]
+    return {
+        "total": len(rows),
+        "going": len(going),
+        "attendees": sum(int(r.get("guests") or 1) for r in going),
+    }
+
+
+@api_router.patch("/rsvps/{rid}/status", response_model=Rsvp)
+async def update_rsvp_status(
+    rid: str, payload: RsvpStatusUpdate, user: dict = Depends(require_staff)
+):
+    res = await db.rsvps.find_one_and_update(
+        {"id": rid},
+        {"$set": {"status": payload.status}},
+        return_document=True,
+        projection={"_id": 0},
+    )
+    if not res:
+        raise HTTPException(status_code=404, detail="RSVP not found")
+    return res
+
+
+@api_router.delete("/rsvps/{rid}")
+async def delete_rsvp(rid: str, user: dict = Depends(require_staff)):
+    res = await db.rsvps.delete_one({"id": rid})
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail="RSVP not found")
+    return {"status": "deleted"}
+
+
 # --- Site content (live editor) ---
 @api_router.get("/content")
 async def get_content():
@@ -629,6 +752,44 @@ async def put_content(payload: ContentIn, user: dict = Depends(require_staff)):
 
 
 # ---------- Uploads ----------
+@api_router.post("/uploads/video")
+async def upload_video(file: UploadFile = File(...), user: dict = Depends(require_staff)):
+    ct = (file.content_type or "").lower()
+    if ct not in ALLOWED_VIDEO_TYPES:
+        raise HTTPException(
+            status_code=415,
+            detail=f"Unsupported video type: {ct or 'unknown'}. Allowed: MP4, WebM, MOV.",
+        )
+    ext = {"video/mp4": ".mp4", "video/webm": ".webm", "video/quicktime": ".mov"}.get(
+        ct, ".mp4"
+    )
+    fname = f"{uuid.uuid4().hex}{ext}"
+    dest = UPLOAD_DIR / fname
+    total = 0
+    with dest.open("wb") as f:
+        while True:
+            chunk = await file.read(1024 * 256)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > MAX_VIDEO_BYTES:
+                f.close()
+                try:
+                    dest.unlink()
+                except Exception:
+                    pass
+                raise HTTPException(
+                    status_code=413, detail="Video too large. Maximum 40 MB."
+                )
+            f.write(chunk)
+    return {
+        "url": f"/api/uploads/{fname}",
+        "filename": fname,
+        "size": total,
+        "content_type": ct,
+    }
+
+
 @api_router.post("/uploads/image")
 async def upload_image(file: UploadFile = File(...), user: dict = Depends(require_staff)):
     ct = (file.content_type or "").lower()

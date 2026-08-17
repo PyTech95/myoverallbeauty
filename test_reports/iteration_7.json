@@ -1,0 +1,30 @@
+{
+  "summary": "End-to-end verification of the three follow-ups on the Grand Opening pop-up: (1) Event RSVP API + pop-up RSVP form + Studio RSVPs inbox; (2) Auto-expiry via editor-promo-expires; (3) Upload-from-Studio via POST /api/uploads/video. Wrote /app/backend/tests/test_iteration7_rsvp_uploads.py covering 23 backend cases (all pass). Frontend Playwright verified home pop-up RSVP submit → thank-you panel, back button, empty-field submit blocked, Studio RSVPs tab shows attendees=7 with 3 rows and status change persists after reload, past date -> pop-up hidden on home, future date -> pop-up shown again, VideoInput non-video file shows toast 'Please pick a video file.' and mp4 upload returns /api/uploads/<uuid>.mp4 that persists via save. Mobile 390px pop-up RSVP form fits with all fields visible. Cleanup: all TEST RSVPs deleted via staff DELETE and Studio → 'Reset all to defaults' triggered.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration7_rsvp_uploads.py",
+    "/app/test_reports/pytest/iter7_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "RsvpPanel.jsx load() swallows errors with a generic 'Failed to load RSVPs.' toast. If load runs before the auth token is present in localStorage (e.g., direct navigation to /studio?tab=rsvps immediately after login), the request goes out without the Authorization header, returns 401, and the panel silently shows 0 rows / 0 attendees. Consider deferring load until authHeader() has a token, or re-fetching when the token becomes available. Working case (clicking the RSVPs tab from the header) works correctly and returned 3 rows / 7 attendees in this run.",
+    "POST /api/rsvps response is {status, id, updated} only — it does not echo the persisted record. Not a bug (spec only requires updated:true on duplicate), but returning the full Rsvp doc would let the caller confirm what was stored without a second round-trip.",
+    "StudioEditor.jsx: the 'Reset all to defaults' button is at the very bottom of the sidebar and required a JS .click() dispatch during testing because it scrolled outside the viewport even after auto-scroll. Consider making the sidebar independently scrollable or sticking the reset action at the top of a secondary panel.",
+    "VideoInput.onFile size check (40 MB) is done client-side only from file.size before upload — good. Backend also enforces 40 MB with 413. Both aligned."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration7_rsvp_uploads.py"
+  ],
+  "success_rate": {"backend": "100% (23/23)", "frontend": "100% (all critical flows verified)"},
+  "test_credentials": "Staff: crystal@overallbeauty.com / Overall2025! (worked). Client accounts created via POST /api/auth/register with {email,password,first_name,last_name}.",
+  "seed_data_creation": "3 TEST RSVPs were created during testing (TEST UI User, TEST RSVP, Jane Tester from a smoke test). All deleted at end via staff DELETE /api/rsvps/{id}. Editor content overrides were reverted via 'Reset all to defaults'.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All iteration-7 features (Event RSVP, Auto-expiry, Upload-from-Studio) are working end-to-end. Backend contract for POST /api/rsvps returns {status, id, updated:bool}. Duplicate (email+event) upserts guests/name/phone/note. Staff-only endpoints correctly return 401 for anonymous and 403 for client tokens. Video upload accepts mp4/webm/mov, rejects other types with 415, rejects >40 MB with 413, returns /api/uploads/<uuid>.<ext> that is publicly GET-able. Frontend RSVP panel loads via authHeader() — click the tab (do not deep-link right after login) to avoid a first-load race that swallows the 401. Auto-expiry uses expires_on (YYYY-MM-DD); past date hides pop-up entirely, future date shows, empty always shows.",
+  "rca of the issue": "N/A — no bugs found. The one soft issue (RsvpPanel showing 0 on deep-link right after login) is a race between auth context hydration and the panel's initial fetch; documented as code-review comment, not blocking."
+}
