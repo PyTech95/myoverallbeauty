@@ -1,25 +1,15 @@
-const WORDS = [
-    "Botox",
-    "Xeomin",
-    "Lip Filler",
-    "Sculptra",
-    "Radiesse",
-    "Microneedling",
-    "PRP",
-    "PDO Threads",
-    "Hydroderm",
-    "Hair Restoration",
-    "IV Hydration",
-    "Wellness",
-    "Beauty",
-    "Confidence",
-    "Renewal",
-];
+import { useContent } from "../../lib/contentContext";
 
 export default function Marquee() {
+    const { content } = useContent();
+    const words = (content.marquee?.words || []).filter(
+        (w) => typeof w === "string" && w.trim(),
+    );
+    if (!words.length) return null;
+
     const row = (
         <div className="flex shrink-0 items-center gap-16 pr-16">
-            {WORDS.map((w, i) => (
+            {words.map((w, i) => (
                 <span key={i} className="flex items-center gap-16">
                     <span className="font-serif text-6xl italic text-white/85 sm:text-7xl lg:text-8xl">
                         {w}

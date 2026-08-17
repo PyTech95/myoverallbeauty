@@ -9,6 +9,7 @@ import axios from "axios";
 
 const SECTIONS = [
     { id: "banner", label: "Launch banner" },
+    { id: "marquee", label: "Scrolling words" },
     { id: "hero", label: "Hero" },
     { id: "manifesto", label: "Manifesto" },
     { id: "founder", label: "Founder" },
@@ -193,6 +194,54 @@ export default function StudioEditor() {
                                     onChange={(v) => patch("banner", { tertiary: v })}
                                     testid="editor-banner-tertiary"
                                 />
+                            </SectionCard>
+                        )}
+
+                        {active === "marquee" && (
+                            <SectionCard
+                                title="Scrolling words"
+                                hint="The large words that scroll across the home page. Edit or remove any word — it saves instantly to the live site."
+                            >
+                                <div className="space-y-3">
+                                    {(draft.marquee?.words || []).map((w, i) => (
+                                        <div key={i} className="flex gap-2">
+                                            <input
+                                                className="field"
+                                                value={w}
+                                                data-testid={`editor-marquee-word-${i}`}
+                                                onChange={(e) => {
+                                                    const arr = [...(draft.marquee?.words || [])];
+                                                    arr[i] = e.target.value;
+                                                    patchNested("marquee", "words", arr);
+                                                }}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const arr = [...(draft.marquee?.words || [])];
+                                                    arr.splice(i, 1);
+                                                    patchNested("marquee", "words", arr);
+                                                }}
+                                                className="shrink-0 border border-white/15 px-3 text-white/60 transition-colors hover:border-red-400 hover:text-red-400"
+                                                aria-label={`Remove ${w}`}
+                                                data-testid={`editor-marquee-word-remove-${i}`}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() =>
+                                            patchNested("marquee", "words", [
+                                                ...(draft.marquee?.words || []),
+                                                "",
+                                            ])
+                                        }
+                                        className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 label text-white/70 transition-colors hover:border-gold hover:text-gold"
+                                        data-testid="editor-marquee-add"
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> Add word
+                                    </button>
+                                </div>
                             </SectionCard>
                         )}
 
