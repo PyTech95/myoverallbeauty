@@ -40,6 +40,11 @@ Public marketing site; multi-step booking with live availability; double-booking
 - Auth-gated routes emit noindex even during the auth-loading flash (noindex hoisted into `RequireAuth`); unknown URLs now redirect to `/` via a catch-all route
 - Verified by testing agent (iteration_5): FAQ CRUD + live-editor add/remove persist across reload, all JSON-LD valid, per-route meta correct, static SEO files served 200
 
+## Pop-up video (2026-06, iteration 4)
+- Grand Opening video pop-up on the home page: opens 5s after load, once per browser session, muted autoplay + loop with an unmute toggle, rotating gold close button, "Book Consultation" CTA and "Maybe later" dismiss, Esc/backdrop close
+- Video stored at `frontend/public/promo.mp4` with a VP9 `promo.webm` fallback source (headless/older browsers)
+- Fully editable in **Studio → Editor → Pop-up video** (on/off, once-per-visit, file/URL, delay seconds, title, subtitle, button labels); title/subtitle/labels also live-editable
+
 ## Known Gaps
 - **Email/SMS NOT configured** — booking + contact succeed but no confirmation emails are sent (needs Resend/SMTP keys)
 - `GET /api/admin/stats` not implemented (not used by the frontend)

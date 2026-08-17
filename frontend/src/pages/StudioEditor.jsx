@@ -10,6 +10,7 @@ import axios from "axios";
 const SECTIONS = [
     { id: "brand", label: "Brand & menu" },
     { id: "banner", label: "Launch banner" },
+    { id: "promo_video", label: "Pop-up video" },
     { id: "marquee", label: "Scrolling words" },
     { id: "hero", label: "Hero" },
     { id: "manifesto", label: "Manifesto" },
@@ -480,6 +481,90 @@ export default function StudioEditor() {
                                             testid={`editor-footer-${k}`}
                                         />
                                     ))}
+                                </div>
+                            </SectionCard>
+                        )}
+
+                        {active === "promo_video" && (
+                            <SectionCard
+                                title="Pop-up video"
+                                hint="A welcome video that opens over the home page a few seconds after it loads."
+                            >
+                                <label className="flex items-center gap-3 py-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!draft.promo_video?.enabled}
+                                        data-testid="editor-promo-enabled"
+                                        onChange={(e) =>
+                                            patch("promo_video", {
+                                                enabled: e.target.checked,
+                                            })
+                                        }
+                                    />
+                                    <span className="text-sm text-white/80">
+                                        Show the pop-up video
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-3 py-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!draft.promo_video?.once_per_visit}
+                                        data-testid="editor-promo-once"
+                                        onChange={(e) =>
+                                            patch("promo_video", {
+                                                once_per_visit: e.target.checked,
+                                            })
+                                        }
+                                    />
+                                    <span className="text-sm text-white/80">
+                                        Only once per visit
+                                    </span>
+                                </label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <TextInput
+                                        label="Video file or URL"
+                                        value={draft.promo_video?.src || ""}
+                                        onChange={(v) => patch("promo_video", { src: v })}
+                                        testid="editor-promo-src"
+                                    />
+                                    <TextInput
+                                        label="Delay before it opens (seconds)"
+                                        value={String(draft.promo_video?.delay_seconds ?? 5)}
+                                        onChange={(v) =>
+                                            patch("promo_video", {
+                                                delay_seconds: Number(v) || 0,
+                                            })
+                                        }
+                                        testid="editor-promo-delay"
+                                    />
+                                </div>
+                                <TextInput
+                                    label="Title"
+                                    value={draft.promo_video?.title || ""}
+                                    onChange={(v) => patch("promo_video", { title: v })}
+                                    testid="editor-promo-title"
+                                />
+                                <TextArea
+                                    label="Subtitle"
+                                    value={draft.promo_video?.subtitle || ""}
+                                    onChange={(v) => patch("promo_video", { subtitle: v })}
+                                    testid="editor-promo-subtitle"
+                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <TextInput
+                                        label="Button label"
+                                        value={draft.promo_video?.cta_label || ""}
+                                        onChange={(v) => patch("promo_video", { cta_label: v })}
+                                        testid="editor-promo-cta"
+                                    />
+                                    <TextInput
+                                        label="Dismiss link label"
+                                        value={draft.promo_video?.dismiss_label || ""}
+                                        onChange={(v) =>
+                                            patch("promo_video", { dismiss_label: v })
+                                        }
+                                        testid="editor-promo-dismiss"
+                                    />
                                 </div>
                             </SectionCard>
                         )}

@@ -163,6 +163,18 @@ export const DEFAULT_CONTENT = {
         book_label: "Book consultation",
     },
     testimonials: TESTIMONIALS,
+    promo_video: {
+        enabled: true,
+        src: "/promo.mp4",
+        src_webm: "/promo.webm",
+        delay_seconds: 5,
+        once_per_visit: true,
+        title: "Grand Opening — Sunday, August 30th",
+        subtitle:
+            "12PM–4PM · 208 Airport Plaza Boulevard, Suite 8, Farmingdale, NY · Free giveaways, raffles & beauty demos. Stop by and say hi.",
+        cta_label: "Book Consultation",
+        dismiss_label: "Maybe later",
+    },
     faq: {
         eyebrow: "Questions",
         title: "Frequently asked questions",

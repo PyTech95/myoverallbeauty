@@ -1,0 +1,24 @@
+{
+  "summary": "Frontend-only testing of the new PromoVideo pop-up feature and its Studio editor integration on the home page. Verified 5s delayed appearance, all 4 close paths (X button, backdrop, Escape, Maybe later), CTA navigation to /book, sound toggle, sessionStorage-based once-per-visit behaviour, page-scoping (only /), mobile 390px layout, and full Studio editor round-trip (toggle disabled -> hides, custom delay/title/subtitle/CTA/dismiss -> reflected in modal, Reset all to defaults -> restores). Content collection was reset to defaults at the end as requested.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PromoVideo.jsx: 'once_per_visit' toggle in editor exists but the guard in useEffect (line 18) checks sessionStorage regardless of the toggle value - if V.once_per_visit is false, the code still skips when SEEN_KEY is set. Actually correct: `V.once_per_visit && sessionStorage.getItem(...)` correctly short-circuits when once_per_visit is false. No bug, just noted.",
+    "PromoVideo.jsx: When sound is unmuted and modal is re-opened later in the session, `muted` state defaults back to true but the <video> element's `muted` attribute is set to true on mount - fine. However if user closes and re-opens in the same session (currently blocked by once_per_visit) muted state resets which is expected.",
+    "StudioEditor.jsx: 'editor-reset-all' button uses window.confirm which is not styled consistently with the rest of the dark theme - minor UX polish, not a bug."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "test_credentials": "Staff: crystal@overallbeauty.com / Overall2025! (worked)",
+  "seed_data_creation": "None; content overrides created temporarily and reverted via 'Reset all to defaults' at end.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "PromoVideo feature is fully working: 5s delay, autoplay-muted-loop video, gold circular close button, backdrop/Escape/Maybe later close paths, CTA -> /book, sound unmute toggle, once-per-visit via sessionStorage 'obw_promo_seen', hidden on /faq /book /studio, mobile 390px fits (modal 358px wide). Studio editor promo_video tab persists changes correctly and 'Reset all to defaults' clears overrides. Note: Escape close requires ~500ms after modal mount for the useEffect to attach keydown listener; not a bug, just test timing. Headless Chromium cannot decode the H.264 mp4 (webm fallback plays) - environment limitation, not a bug per E1's note.",
+  "rca of the issue": "N/A - no bugs found"
+}

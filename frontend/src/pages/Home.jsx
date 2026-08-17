@@ -10,6 +10,7 @@ import Booking from "../components/sections/Booking";
 import Testimonials from "../components/sections/Testimonials";
 import Footer from "../components/sections/Footer";
 import ScrollProgress from "../components/ScrollProgress";
+import PromoVideo from "../components/PromoVideo";
 import { useContent } from "../lib/contentContext";
 import { useSeo } from "../lib/seo";
 
@@ -37,6 +38,7 @@ export default function Home() {
             data-testid="home-page"
         >
             <ScrollProgress />
+            <PromoVideo />
             <AnnouncementBar />
             <Nav />
             <Hero />
