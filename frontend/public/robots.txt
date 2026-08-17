@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /studio
+Disallow: /account
+Disallow: /signin
+Disallow: /signup
+Disallow: /api/
+
+Sitemap: https://www.myoverallbeauty.com/sitemap.xml

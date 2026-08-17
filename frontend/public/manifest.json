@@ -1,0 +1,25 @@
+{
+    "short_name": "Overall Beauty",
+    "name": "Overall Beauty & Wellness",
+    "description": "Aesthetic & wellness treatments by Crystal G. Marrero, FNP-C — Farmingdale, NY.",
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0A0A0A",
+    "theme_color": "#0A0A0A",
+    "categories": ["health", "beauty", "wellness", "medical", "lifestyle"]
+}

@@ -1,0 +1,51 @@
+{
+  "summary": "Restoration verification for Overall Beauty & Wellness. Ran pytest suite (70 tests) and end-to-end UI + API smoke of homepage, staff signin, Studio bookings inbox, Studio editor, booking flow, contact form, client signup/login/mine, availability, double-booking 409, role-gating, and mobile viewport. Backend 67/70 passing (3 failures are all email/SMTP related and are expected in this environment since EMERGENT_EMAIL_KEY / SMTP are not configured). Frontend loads cleanly with zero console errors on public site and Studio. Booking made via API appears immediately in Studio inbox. Content editor GET/PUT persist. Client role gating correctly returns 403 for staff-only endpoints. Only issue found: GET /api/admin/stats returns 404 — endpoint is not implemented in server.py (was listed in test requirements).",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "GET /api/admin/stats", "issue": "Endpoint not implemented in backend/server.py (returns 404 'Not Found'). Was listed as a required feature (admin stats endpoint returning booking/contact counts).", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "POST /api/consultations", "issue": "Accepts arbitrary preferred_time strings that are not on the schedule's 45-min slot grid (e.g. '2:30 PM' accepted even though availability only exposes 2:15 PM / 3:00 PM). The double-booking check works exact-string, so an off-grid time cannot be blocked by a real user's availability-selected booking. Consider validating preferred_time against computed slot list."},
+      {"endpoint": "N/A (SMTP)", "issue": "3 pytest email tests fail because EMERGENT_EMAIL_KEY / SMTP env vars are not configured (test_iteration8_smtp::test_env_smtp_keys_present, test_smtp_log_lines_present, test_iteration5::test_post_returns_200_and_shape). Expected per main-agent note — booking still succeeds without email; only email side-effects are skipped."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_auth_and_roles.py",
+    "/app/backend/tests/test_iteration3.py",
+    "/app/backend/tests/test_iteration5.py",
+    "/app/backend/tests/test_iteration8_smtp.py",
+    "/app/backend/tests/test_uploads.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Implement GET /api/admin/stats returning booking + contact counts (documented feature is missing).",
+    "(Optional) Validate POST /api/consultations preferred_time against the computed slot grid so off-grid times cannot be submitted directly to the API.",
+    "(Environment) SMTP / EMERGENT_EMAIL_KEY not configured — booking + contact still succeed but no emails are sent. If email delivery is required in this preview env, add the missing keys."
+  ],
+  "critical_code_review_comments": [
+    "server.py is a single 817-line file — consider splitting routers (auth, consultations, content, schedule, uploads, contact) into modules for maintainability.",
+    "Uses deprecated @app.on_event('startup'/'shutdown') — should migrate to FastAPI lifespan handlers (DeprecationWarnings in pytest output).",
+    "Each pytest file hard-codes a preview URL default (beauty-confidence-co-2...) that no longer matches this environment. I updated conftest.py + 3 test files to point at the current REACT_APP_BACKEND_URL (spa-wellness-pro-2...). Recommend replacing per-file defaults with the conftest fallback so future re-hosts don't break the suite.",
+    "PUT /api/content expects payload wrapped as {\"data\": {...}} but ContentIn declares extra='allow' — the top-level extra keys are silently dropped by the handler (only payload.data is read). Slightly misleading schema; consider removing extra='allow' or documenting the wrapper.",
+    "Missing /api/admin/stats endpoint referenced in requirements."
+  ],
+  "updated_files": [
+    "/app/backend/tests/conftest.py (added frontend/.env fallback for REACT_APP_BACKEND_URL)",
+    "/app/backend/tests/backend_test.py (updated stale hardcoded default URL)",
+    "/app/backend/tests/test_auth_and_roles.py (updated stale hardcoded default URL)",
+    "/app/backend/tests/test_iteration3.py (updated stale hardcoded default URL)"
+  ],
+  "success_rate": {"backend": "96% (67/70 pytest; 3 failures = expected SMTP-not-configured)", "frontend": "100% (all tested flows pass, zero console errors)"},
+  "test_credentials": "Staff: crystal@overallbeauty.com / Overall2025! (from /app/memory/test_credentials.md). Client: created ad-hoc via /api/auth/register during testing.",
+  "seed_data_creation": "Created 3 test consultations (UITEST User, C D, Test Client) and 1 contact message via API to verify Studio inbox rendering and persistence. Also wrote a hero.tagline override to /api/content — main agent may want to reset via 'Reset all to defaults' in the editor before shipping.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "conftest.py now falls back to reading frontend/.env for REACT_APP_BACKEND_URL, so pytest can be run without env exports. Just: `cd /app && python -m pytest backend/tests/ -v`. The 3 SMTP-related failures are expected until EMERGENT_EMAIL_KEY / SMTP creds are provided. All other core flows (auth, booking, availability, double-book 409, role gating, content editor, contact, uploads, /mine) are green. The only real backend gap is the missing /api/admin/stats endpoint.",
+  "rca_of_the_issue": "GET /api/admin/stats returns 404 because there is no route defined for '/admin/stats' in /app/backend/server.py (grep '/admin\\|stats' returns nothing). Reproduction: `curl -H 'Authorization: Bearer <staff-token>' https://spa-wellness-pro-2.preview.emergentagent.com/api/admin/stats` → {\"detail\":\"Not Found\"}. Mitigation: add an @api_router.get('/admin/stats', dependencies=[Depends(require_staff)]) endpoint that returns {'bookings': await db.consultations.count_documents({}), 'contacts': await db.messages.count_documents({}), ...}."
+}

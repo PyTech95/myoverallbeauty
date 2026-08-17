@@ -1,0 +1,5 @@
+/* Component-scoped styles kept minimal — most styling via tailwind */
+.App {
+    background: #0a0a0a;
+    min-height: 100vh;
+}
