@@ -1,0 +1,30 @@
+{
+  "summary": "Iteration 9 — full backend+frontend verification of Email Confirmations, Event Reminder Cron, Text Size Toggle (desktop + mobile hamburger), Before & After Gallery editor upload + public render, and Results nav link. 10/10 backend pytest cases pass. Backend log confirms POST https://integrations.emergentagent.com/api/v1/email/send returning 202 for consultation, contact, and RSVP flows (also confirmed via prior smoke: reminder cron 'sent: 1' then 'sent: 0' due to reminded_for flag). Cron 401 without/with wrong Bearer, 'accepted' + 'duplicate' idempotency on repeat X-Webhook-Id, and 'no event today' branch when today (2026-08-17) != event_date (2026-08-30) all verified. _assert_safe_email is called from send_email BEFORE either SMTP or Resend path — verified by code reading; email HTML templates (consultation, RSVP guest+staff, contact, event reminder) contain no <form>/<input>/<textarea>/<select>, all links are https or mailto/tel/cid, and no send route accepts recipient/subject/html from the caller (all constructed server-side). Frontend: text-size-toggle cycles 17→18→20px (base/lg/xl) with labels A/A+/A++, persists via localStorage across reload and across pages (/book), and is present in both desktop nav (lg:flex) and inside the mobile hamburger menu. Results nav link renders in the xl desktop nav with href=#results. Gallery editor: enable toggle, add-item, image upload (staff-authenticated POST /api/uploads/image returning /api/uploads/<hash>.png), caption, label, and save all work. Public home #results section renders both panes with correct images (naturalWidth > 0), caption, Book CTA, and stays hidden when items are empty or enabled=false. Reset-all-to-defaults restores gallery.items=[] and hides the section. Cleanup complete: 1 TEST_ RSVP deleted via /api/rsvps/{id}; editor content reset to defaults; leftover consultation and contact rows created via test remain (no client-facing delete endpoints — will be visible in Studio Bookings/Contacts under TEST_ prefix for staff manual cleanup if desired).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration9_email_cron.py",
+    "/app/test_reports/pytest/iter9.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "/app/.emergent/crons.yml uses Jinja-style '{{BASE_URL}}' (double braces) — review request text says 'literal {BASE_URL}' (single braces). Emergent platform cron loader typically accepts {{BASE_URL}}; iterations 1-8 were green so this is presumably correct, but flagging in case the review spec meant single braces exactly.",
+    "Gallery.jsx uses `pane.src` directly (e.g. '/api/uploads/<hash>.png') for public <img src>. This works because the frontend is served on the same origin as the /api ingress route. If the site is ever served from a different origin than the API, gallery images will 404 — consider using the same resolveUrl helper as ImageInput or storing absolute URLs.",
+    "StudioEditor.jsx is 1898 lines — well above the 700-line guideline. Consider splitting per-tab editor sections into separate files for maintainability.",
+    "editor-gallery-enabled is a native <input type='checkbox'> (aria-checked returned None in tests). Not a functional bug, but inconsistent with the Toggle component used elsewhere in the editor (which exposes role='switch'). Consider unifying.",
+    "Email-safety gate (`_assert_safe_email`) is well-placed at the top of `send_email` (server.py:369) so every provider path is covered. Good defensive design."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration9_email_cron.py (new)"
+  ],
+  "success_rate": {"backend": "100% (10/10 pytest)", "frontend": "100% — text toggle, gallery editor+public, Results nav all pass on desktop 1920 and mobile 390"},
+  "test_credentials": "Staff crystal@overallbeauty.com / Overall2025! — verified. Cron secret from backend/.env used successfully.",
+  "seed_data_creation": "Created during tests: 1 consultation (TEST Consult9), 1 contact (TEST Contact9), 1 RSVP (TEST Rsvp9, deleted at end), 1 uploaded 1x1 PNG (present at /api/uploads/<hash>.png; harmless). Editor content was mutated (gallery item added, then Reset-all-to-defaults restored gallery.items=[] and cleared any editor overrides). The consultation and contact records remain in DB with TEST_ prefixes — staff can review in Studio if desired; no user-facing delete endpoints for these resources.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 4 iteration-9 features are shipping-quality. Backend regression file at /app/backend/tests/test_iteration9_email_cron.py — reuse for future email/cron regressions. Backend log grep patterns that were useful: 'email/send' (Resend proxy call), 'no event today' (cron branch), 'event reminders sent' (cron work), 'Email blocked by safety gate' (should never fire in normal flows). Gallery public <img src> uses raw '/api/uploads/...' relative path (works because frontend and /api share an origin). Text toggle root scale steps set in index.css html[data-text-scale=lg|xl]. Mobile hamburger renders a second copy of TextSizeToggle at nav-menu open."
+}

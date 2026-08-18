@@ -10,6 +10,9 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
 import os
+import re
+import asyncio
+import ipaddress
 import logging
 import uuid
 import bcrypt
@@ -17,12 +20,17 @@ import jwt
 import httpx
 import aiosmtplib
 import mimetypes
+import secrets
+from html import escape
+from html.parser import HTMLParser
+from urllib.parse import urlparse
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 
 
 # ---------- Env ----------
@@ -51,6 +59,7 @@ JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALGORITHM = "HS256"
 STAFF_EMAIL = os.environ.get("STAFF_EMAIL", "crystal@overallbeauty.com")
 STAFF_PASSWORD = os.environ.get("STAFF_PASSWORD", "Overall2025!")
+WEBHOOK_CRON_SECRET = os.environ.get("WEBHOOK_CRON_SECRET", "")
 
 app = FastAPI(title="Overall Beauty & Wellness API")
 api_router = APIRouter(prefix="/api")
@@ -232,6 +241,81 @@ class ScheduleConfig(BaseModel):
 
 
 # ---------- Email ----------
+_SHORTENERS = ("bit.ly", "tinyurl.com", "t.co", "is.gd", "cutt.ly", "goo.gl", "rebrand.ly")
+_CRED_ASK = (
+    "reply with your password", "reply with the code", "send your password", "cvv",
+    "send us your password", "enter your password below", "confirm your card number",
+    "your full card number", "seed phrase", "recovery phrase", "verify your card",
+    "social security number", "confirm your bank details",
+)
+_HOSTISH = re.compile(r"\b(?:https?://)?((?:[a-z0-9-]+\.)+[a-z]{2,})", re.I)
+
+
+def _host_ok(host: str) -> bool:
+    if not host or "xn--" in host:
+        return False
+    try:
+        ipaddress.ip_address(host)
+        return False
+    except ValueError:
+        pass
+    return not any(host == s or host.endswith("." + s) for s in _SHORTENERS)
+
+
+def _same_site(shown: str, real: str) -> bool:
+    return shown == real or real.endswith("." + shown) or shown.endswith("." + real)
+
+
+class _EmailScan(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.tags, self.urls, self.anchors = set(), [], []
+        self._href, self._text = None, []
+
+    def handle_starttag(self, tag, attrs):
+        self.tags.add(tag.lower())
+        self.urls += [v for k, v in attrs if k.lower() in ("href", "src") and v]
+        if tag.lower() == "a":
+            self._href = dict((k.lower(), v) for k, v in attrs).get("href")
+            self._text = []
+
+    def handle_data(self, data):
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag.lower() == "a" and self._href is not None:
+            self.anchors.append((self._href, "".join(self._text)))
+            self._href, self._text = None, []
+
+
+def _assert_safe_email(subject: str, html: str) -> None:
+    scan = _EmailScan()
+    scan.feed(html)
+    if scan.tags & {"form", "input", "textarea", "select"}:
+        raise ValueError("No forms or input fields in email (G2)")
+    body = f"{subject}\n{html}".lower()
+    for p in _CRED_ASK:
+        if p in body:
+            raise ValueError(f"Email asks the recipient for credentials: {p!r} (G2)")
+    for url in scan.urls:
+        low = url.strip().lower()
+        if low.startswith(("mailto:", "tel:", "cid:", "#")):
+            continue
+        if not low.startswith("https://"):
+            raise ValueError(f"Email links/assets must be absolute https: {url!r} (G3)")
+        parsed = urlparse(low)
+        if not _host_ok(parsed.hostname or "") or parsed.username is not None:
+            raise ValueError(f"Shortened, numeric-host or credential-bearing URL: {url!r} (G3)")
+    for href, text in scan.anchors:
+        real = urlparse(href.strip().lower()).hostname or ""
+        if not real:
+            continue
+        for m in _HOSTISH.finditer(text):
+            if not _same_site(m.group(1).lower(), real):
+                raise ValueError(f"Anchor text {m.group(1)!r} != real link host {real!r} (G3)")
+
+
 async def _send_via_smtp(recipient: str, subject: str, html: str, reply_to: Optional[str] = None):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -281,6 +365,11 @@ async def _send_via_resend(recipient: str, subject: str, html: str, reply_to: Op
 
 
 async def send_email(recipient: str, subject: str, html: str, reply_to: Optional[str] = None):
+    try:
+        _assert_safe_email(subject, html)
+    except ValueError as e:
+        logging.error(f"Email blocked by safety gate: {e}")
+        return None
     if EMAIL_PROVIDER == "smtp":
         return await _send_via_smtp(recipient, subject, html, reply_to)
     return await _send_via_resend(recipient, subject, html, reply_to)
@@ -723,6 +812,89 @@ async def delete_rsvp(rid: str, user: dict = Depends(require_staff)):
     if not res.deleted_count:
         raise HTTPException(status_code=404, detail="RSVP not found")
     return {"status": "deleted"}
+
+
+# --- Scheduled event reminder (platform cron) ---
+def _require_cron_auth(request: Request) -> None:
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer ") or not WEBHOOK_CRON_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if not secrets.compare_digest(auth[7:], WEBHOOK_CRON_SECRET):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
+def _event_reminder_html(name: str, event_name: str, details: str) -> str:
+    return f"""
+    <div style="background:#0A0A0A;padding:40px 20px;font-family:Arial,sans-serif;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+        style="max-width:640px;margin:0 auto;background:#F9F6F0;border:1px solid #D4AF37;">
+        <tr><td style="padding:36px 40px;">
+          <div style="color:#8A7B4F;font-size:11px;letter-spacing:.3em;text-transform:uppercase;margin-bottom:12px;">
+            {escape(EMAIL_FROM_NAME)}
+          </div>
+          <div style="color:#0A0A0A;font-family:Georgia,serif;font-size:28px;font-style:italic;line-height:1.2;">
+            Today's the day, {escape(name)}!
+          </div>
+          <p style="color:#333;font-size:15px;line-height:1.6;margin-top:20px;">
+            Just a friendly reminder about <strong>{escape(event_name)}</strong>.
+          </p>
+          <p style="color:#333;font-size:15px;line-height:1.6;">{escape(details)}</p>
+          <p style="color:#333;font-size:15px;line-height:1.6;">
+            We can't wait to see you. If your plans changed, simply reply to this email and let us know.
+          </p>
+          <p style="color:#8A7B4F;font-size:12px;margin-top:28px;">
+            Sent by {escape(EMAIL_FROM_NAME)}. We never ask for passwords or payment details by email.
+          </p>
+        </td></tr>
+      </table>
+    </div>
+    """
+
+
+async def _run_event_reminders(run_id: str) -> None:
+    content = await db.content.find_one({"id": "main"}, {"_id": 0}) or {}
+    promo = content.get("promo_video") or {}
+    event_date = promo.get("event_date") or "2026-08-30"
+    event_name = promo.get("event_name") or "our event"
+    details = promo.get("event_details") or ""
+    today = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+    if today != event_date:
+        logging.info(f"[cron {run_id}] no event today ({today} != {event_date})")
+        return
+    guests = await db.rsvps.find({"status": "going"}, {"_id": 0}).to_list(2000)
+    sent = 0
+    for g in guests:
+        if g.get("reminded_for") == event_date:
+            continue
+        await send_email(
+            recipient=g["email"],
+            subject=f"Reminder: {event_name} is today",
+            html=_event_reminder_html(g.get("name") or "there", event_name, details),
+            reply_to=BUSINESS_EMAIL,
+        )
+        await db.rsvps.update_one(
+            {"id": g["id"]}, {"$set": {"reminded_for": event_date, "reminded_at": now_iso()}}
+        )
+        sent += 1
+    logging.info(f"[cron {run_id}] event reminders sent: {sent}")
+
+
+@api_router.post("/cron/event-reminder")
+async def cron_event_reminder(request: Request):
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    _require_cron_auth(request)
+    try:
+        envelope = await request.json()
+    except Exception:
+        envelope = {}
+    run_id = request.headers.get("X-Webhook-Id") or envelope.get("run_id") or str(uuid.uuid4())
+    claim = await db.cron_runs.update_one(
+        {"run_id": run_id}, {"$setOnInsert": {"run_id": run_id, "at": now_iso()}}, upsert=True
+    )
+    if claim.upserted_id is None:
+        return {"status": "duplicate", "run_id": run_id}
+    asyncio.create_task(_run_event_reminders(run_id))
+    return {"status": "accepted", "run_id": run_id}
 
 
 # --- Site content (live editor) ---

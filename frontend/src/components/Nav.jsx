@@ -6,6 +6,7 @@ import { Menu, X, LogIn, UserPlus } from "lucide-react";
 import { useContent } from "../lib/contentContext";
 import { useAuth } from "../lib/auth";
 import { UserMenu } from "../lib/AuthShell";
+import TextSizeToggle from "./TextSizeToggle";
 
 export default function Nav() {
     const [scrolled, setScrolled] = useState(false);
@@ -62,6 +63,7 @@ export default function Nav() {
                 </nav>
 
                 <div className="hidden items-center gap-4 lg:flex">
+                    <TextSizeToggle />
                     {user ? (
                         <UserMenu />
                     ) : (
@@ -102,8 +104,7 @@ export default function Nav() {
                     data-testid="nav-menu-open"
                 >
                     <Menu className="h-6 w-6" />
-                </button>
-            </div>
+                </button>            </div>
 
             {typeof document !== "undefined" &&
                 createPortal(
@@ -151,6 +152,7 @@ export default function Nav() {
                                         </motion.a>
                                     ))}
                                     <div className="mt-6 h-px w-full bg-white/10" />
+                                    <TextSizeToggle />
                                     {user ? (
                                         <div className="flex flex-wrap gap-4">
                                             <Link

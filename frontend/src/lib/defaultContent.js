@@ -20,6 +20,7 @@ export const DEFAULT_CONTENT = {
         links: [
             { label: "Philosophy", href: "#philosophy" },
             { label: "Services", href: "#services" },
+            { label: "Results", href: "#results" },
             { label: "Founder", href: "#founder" },
             { label: "Consultation", href: "#consultation" },
             { label: "Contact", href: "#contact" },
@@ -163,6 +164,19 @@ export const DEFAULT_CONTENT = {
         book_label: "Book consultation",
     },
     testimonials: TESTIMONIALS,
+    gallery: {
+        enabled: true,
+        eyebrow: "07 — Results",
+        title: "Real results,",
+        title_italic: "real people.",
+        subtitle:
+            "A look at what personalized, evidence-informed treatment can do. Every plan is built around your face, your goals and your timeline.",
+        before_label: "Before",
+        after_label: "After",
+        disclaimer:
+            "Photos are of consenting clients. Individual results vary — your plan is discussed at consultation.",
+        items: [],
+    },
     promo_video: {
         enabled: true,
         src: "/promo.mp4",
@@ -182,6 +196,8 @@ export const DEFAULT_CONTENT = {
         rsvp_note: "Let us know you're coming and we'll save you a spot.",
         rsvp_success: "You're on the list — see you there!",
         event_name: "Grand Opening — Sunday, August 30th",
+        event_date: "2026-08-30",
+        event_details: "12PM–4PM · 208 Airport Plaza Boulevard, Suite 8, Farmingdale, NY",
     },
     faq: {
         eyebrow: "Questions",

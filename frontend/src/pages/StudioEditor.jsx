@@ -20,6 +20,7 @@ const SECTIONS = [
     { id: "mission", label: "Mission" },
     { id: "contact", label: "Contact & hours" },
     { id: "testimonials", label: "Testimonials" },
+    { id: "gallery", label: "Before & after" },
     { id: "faq", label: "FAQ" },
     { id: "footer", label: "Footer labels" },
     { id: "legal", label: "Legal metadata" },
@@ -458,6 +459,157 @@ export default function StudioEditor() {
                             </SectionCard>
                         )}
 
+                        {active === "gallery" && (
+                            <SectionCard
+                                title="Before & after gallery"
+                                hint="Upload paired photos. Only add photos you have written consent to publish."
+                            >
+                                <label className="flex items-center gap-3 py-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!draft.gallery?.enabled}
+                                        data-testid="editor-gallery-enabled"
+                                        onChange={(e) =>
+                                            patch("gallery", { enabled: e.target.checked })
+                                        }
+                                    />
+                                    <span className="text-sm text-white/80">
+                                        Show the results section on the home page
+                                    </span>
+                                </label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <TextInput
+                                        label="Eyebrow"
+                                        value={draft.gallery?.eyebrow || ""}
+                                        onChange={(v) => patch("gallery", { eyebrow: v })}
+                                        testid="editor-gallery-eyebrow"
+                                    />
+                                    <TextInput
+                                        label="Title"
+                                        value={draft.gallery?.title || ""}
+                                        onChange={(v) => patch("gallery", { title: v })}
+                                        testid="editor-gallery-title"
+                                    />
+                                    <TextInput
+                                        label="Title (italic part)"
+                                        value={draft.gallery?.title_italic || ""}
+                                        onChange={(v) => patch("gallery", { title_italic: v })}
+                                        testid="editor-gallery-title-italic"
+                                    />
+                                    <TextInput
+                                        label="'Before' label"
+                                        value={draft.gallery?.before_label || ""}
+                                        onChange={(v) => patch("gallery", { before_label: v })}
+                                        testid="editor-gallery-before-label"
+                                    />
+                                    <TextInput
+                                        label="'After' label"
+                                        value={draft.gallery?.after_label || ""}
+                                        onChange={(v) => patch("gallery", { after_label: v })}
+                                        testid="editor-gallery-after-label"
+                                    />
+                                </div>
+                                <TextArea
+                                    label="Intro paragraph"
+                                    value={draft.gallery?.subtitle || ""}
+                                    onChange={(v) => patch("gallery", { subtitle: v })}
+                                    testid="editor-gallery-subtitle"
+                                />
+                                <TextArea
+                                    label="Disclaimer"
+                                    value={draft.gallery?.disclaimer || ""}
+                                    onChange={(v) => patch("gallery", { disclaimer: v })}
+                                    testid="editor-gallery-disclaimer"
+                                />
+
+                                <div className="mt-6 space-y-6">
+                                    {(draft.gallery?.items || []).map((it, i) => (
+                                        <div
+                                            key={i}
+                                            className="border border-white/10 p-4"
+                                            data-testid={`editor-gallery-item-${i}`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="label text-gold">
+                                                    Result {i + 1}
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const arr = [...(draft.gallery?.items || [])];
+                                                        arr.splice(i, 1);
+                                                        patchNested("gallery", "items", arr);
+                                                    }}
+                                                    className="text-white/50 hover:text-red-400"
+                                                    aria-label="Remove result"
+                                                    data-testid={`editor-gallery-remove-${i}`}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                                <ImageInput
+                                                    label="Before photo"
+                                                    value={it.before || ""}
+                                                    onChange={(v) => {
+                                                        const arr = [...(draft.gallery?.items || [])];
+                                                        arr[i] = { ...arr[i], before: v };
+                                                        patchNested("gallery", "items", arr);
+                                                    }}
+                                                    testid={`editor-gallery-${i}-before`}
+                                                    aspect="4/5"
+                                                />
+                                                <ImageInput
+                                                    label="After photo"
+                                                    value={it.after || ""}
+                                                    onChange={(v) => {
+                                                        const arr = [...(draft.gallery?.items || [])];
+                                                        arr[i] = { ...arr[i], after: v };
+                                                        patchNested("gallery", "items", arr);
+                                                    }}
+                                                    testid={`editor-gallery-${i}-after`}
+                                                    aspect="4/5"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <TextInput
+                                                    label="Tab label"
+                                                    value={it.label || ""}
+                                                    onChange={(v) => {
+                                                        const arr = [...(draft.gallery?.items || [])];
+                                                        arr[i] = { ...arr[i], label: v };
+                                                        patchNested("gallery", "items", arr);
+                                                    }}
+                                                    testid={`editor-gallery-${i}-label`}
+                                                />
+                                                <TextInput
+                                                    label="Caption"
+                                                    value={it.caption || ""}
+                                                    onChange={(v) => {
+                                                        const arr = [...(draft.gallery?.items || [])];
+                                                        arr[i] = { ...arr[i], caption: v };
+                                                        patchNested("gallery", "items", arr);
+                                                    }}
+                                                    testid={`editor-gallery-${i}-caption`}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() =>
+                                            patchNested("gallery", "items", [
+                                                ...(draft.gallery?.items || []),
+                                                { before: "", after: "", label: "", caption: "" },
+                                            ])
+                                        }
+                                        className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 label text-white/70 hover:border-gold hover:text-gold"
+                                        data-testid="editor-gallery-add"
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> Add before &amp; after
+                                    </button>
+                                </div>
+                            </SectionCard>
+                        )}
+
                         {active === "footer" && (
                             <SectionCard
                                 title="Footer labels"
@@ -620,6 +772,32 @@ export default function StudioEditor() {
                                         onChange={(v) => patch("promo_video", { event_name: v })}
                                         testid="editor-promo-event-name"
                                     />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <label className="block">
+                                            <div className="label mb-2 text-white/50">
+                                                Event date (reminder is emailed that morning)
+                                            </div>
+                                            <input
+                                                type="date"
+                                                className="field"
+                                                value={draft.promo_video?.event_date || ""}
+                                                data-testid="editor-promo-event-date"
+                                                onChange={(e) =>
+                                                    patch("promo_video", {
+                                                        event_date: e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        </label>
+                                        <TextInput
+                                            label="Event details (time & address)"
+                                            value={draft.promo_video?.event_details || ""}
+                                            onChange={(v) =>
+                                                patch("promo_video", { event_details: v })
+                                            }
+                                            testid="editor-promo-event-details"
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <TextInput
                                             label="RSVP button label"

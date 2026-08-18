@@ -8,6 +8,7 @@ import Services from "../components/sections/Services";
 import Founder from "../components/sections/Founder";
 import Booking from "../components/sections/Booking";
 import Testimonials from "../components/sections/Testimonials";
+import Gallery from "../components/sections/Gallery";
 import Footer from "../components/sections/Footer";
 import ScrollProgress from "../components/ScrollProgress";
 import PromoVideo from "../components/PromoVideo";
@@ -47,6 +48,7 @@ export default function Home() {
             <Marquee />
             <Services />
             <Founder />
+            <Gallery />
             <Booking />
             <Testimonials />
             <Footer />

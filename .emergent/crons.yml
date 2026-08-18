@@ -1,0 +1,9 @@
+crons:
+  - name: event-reminder
+    description: "Emails the Grand Opening guest list a reminder at 8am ET on the event morning"
+    cron: "0 8 * * *"
+    timezone: "America/New_York"
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    endpoint: "{{BASE_URL}}/api/cron/event-reminder"
+    method: POST
+    enabled: true

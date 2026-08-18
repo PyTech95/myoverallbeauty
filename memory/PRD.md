@@ -61,6 +61,13 @@ Public marketing site; multi-step booking with live availability; double-booking
 - Service menu: "aka" becomes a gold badge, descriptions 16px at higher contrast; testimonial dots became 44px tap targets; legal/FAQ body copy enlarged with tighter measure
 - Verified by testing agent (iteration_8): no regressions at 1920/1440/390; the one gap found (inputs missing the focus ring) is fixed above
 
+## Emails live + text-size toggle + before/after gallery + event reminder cron (2026-06, iteration 7)
+- **Emails now actually send** via the Emergent-managed Resend integration (`EMERGENT_EMAIL_KEY`, `EMAIL_FROM_NAME`); added the playbook's `_assert_safe_email` guardrail gate, called on every send path. Verified 202 Accepted for consultation, contact and RSVP mails
+- **Event reminder cron**: `.emergent/crons.yml` → `POST /api/cron/event-reminder` daily 08:00 America/New_York; Bearer-`WEBHOOK_CRON_SECRET` auth, run_id idempotency via `cron_runs`, work backgrounded, only fires when today == `promo_video.event_date`, per-guest `reminded_for` flag prevents duplicates. Verified: 401 unauth, accepted→duplicate, sent 1 then 0
+- **Larger text toggle** (`TextSizeToggle`): cycles 16/18/20px root size (A → A+ → A++), persisted in localStorage, in the desktop nav and mobile menu; all rem-based type scales with it
+- **Before & after gallery**: new home `#results` section + Studio → "Before & after" tab (enable/disable, labels, intro, disclaimer, add/remove pairs with image upload for before/after, tab label, caption); "Results" added to the nav
+- Event date + details fields added to the pop-up tab (feed the reminder email)
+
 ## Known Gaps
 - **Email/SMS NOT configured** — booking + contact succeed but no confirmation emails are sent (needs Resend/SMTP keys)
 - `GET /api/admin/stats` not implemented (not used by the frontend)
